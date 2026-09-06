@@ -1,0 +1,112 @@
+{
+  "$schema": "../schemas/repo-vision-contract.schema.json",
+  "schema_version": "1.0.0",
+  "product": {
+    "name": "Quick Vault Retriever",
+    "north_star": "Make private local knowledge as fast and dependable to query as a calculator, without turning retrieval into an unbounded agent.",
+    "target_users": [
+      "People with a local JSONL-first knowledge vault",
+      "Raycast users who need immediate evidence while staying in their current workflow",
+      "Developers integrating a bounded local retrieval primitive"
+    ],
+    "promise": "Turn a natural-language vault query into inspectable, source-cited evidence in seconds while preserving local ownership and safe abstention.",
+    "wedge": "A read-only Python CLI and Raycast Script Command over a compatible SQLite FTS5 projection.",
+    "principles": [
+      "Retrieval owns evidence; optional models may summarize but never invent or expand authority.",
+      "Fast failure is better than a plausible answer from stale or missing evidence.",
+      "The query model is general; entity lookup is one use case rather than the architecture.",
+      "Private runtime state stays local and public artifacts stay synthetic."
+    ],
+    "non_goals": [
+      "Mutating canonical JSONL or human-owned notes",
+      "Operating a general-purpose vault agent",
+      "Producing or repairing the SQLite projection",
+      "Shipping cloud or local-model synthesis in version 0.1",
+      "Optimizing exclusively for contacts, people, or entity properties"
+    ],
+    "assumptions": [
+      "The caller has a locally accessible compatible SQLite FTS5 projection.",
+      "Stable JSONL record IDs are meaningful citations for local use.",
+      "A bounded evidence result is useful without conversational synthesis.",
+      "The caller can supply a canonical ledger watermark when strict freshness is required."
+    ],
+    "success_criteria": [
+      "Warm synthetic p95 retrieval latency is below 1000 ms on the target Mac.",
+      "Every successful hit includes a stable record citation.",
+      "Missing evidence produces not_found with no fabricated answer.",
+      "Fresh-clone setup and make check succeed from documented commands.",
+      "No private record, absolute vault path, secret, or generated runtime artifact is tracked."
+    ]
+  },
+  "architecture": {
+    "system_context": "A local read-only retrieval surface between Raycast or a shell and a derived JSONL Vault SQLite projection.",
+    "components": [
+      "Python command-line interface",
+      "General FTS5 evidence retriever",
+      "Projection compatibility and freshness gate",
+      "Markdown and JSON renderers",
+      "Thin Raycast Script Command"
+    ],
+    "data_flow": [
+      "An arbitrary natural-language query enters through Raycast or the terminal.",
+      "The CLI validates and tokenizes the query without persisting it.",
+      "The retriever opens the projection in immutable query-only mode.",
+      "Compatibility and optional ledger freshness are checked before FTS retrieval.",
+      "Coverage-ranked, bounded snippets leave as a versioned cited evidence packet."
+    ],
+    "trust_boundaries": [
+      "Private query and SQLite projection remain local.",
+      "Canonical JSONL and its writer are outside process authority.",
+      "Public Git contains only source, contracts, documentation, and synthetic fixtures.",
+      "Any future model provider is a separate opt-in boundary."
+    ],
+    "decisions": [
+      "Use SQLite FTS5 because the canonical vault already produces a local projection.",
+      "Use deterministic retrieval before considering model synthesis.",
+      "Keep Raycast thin so the CLI contract remains independently testable and portable.",
+      "Use local gates instead of GitHub Actions."
+    ]
+  },
+  "design_principles": [
+    "Show the answer state before controls or implementation detail.",
+    "Keep successful output concise enough to scan in Raycast.",
+    "Make citations, freshness, ambiguity, and failure states visible.",
+    "Prefer a calm text surface over a dashboard for one-shot questions."
+  ],
+  "engineering_principles": [
+    "Test behavior through the CLI and evidence-packet contract.",
+    "Open data stores with least authority and fail closed on contract drift.",
+    "Keep dependencies minimal and use the Python standard library at runtime.",
+    "Version public output schemas and preserve stable exit codes.",
+    "Measure latency without committing private queries or results."
+  ],
+  "public_safety": {
+    "allowed": [
+      "Synthetic SQLite fixtures generated during tests",
+      "Generic example queries and placeholder runtime paths",
+      "Aggregate redacted performance measurements"
+    ],
+    "forbidden": [
+      "Real vault records or database copies",
+      "Personal names, addresses, private queries, or screenshots",
+      "Absolute user-specific vault paths",
+      "Credentials, tokens, environment files, or key material",
+      "Generated reports, caches, and local benchmark corpora"
+    ],
+    "controls": [
+      "Repository ignore rules",
+      "Synthetic-fixture tests",
+      "Tracked-file privacy and secret scan",
+      "Git-history sensitive-filename and large-blob audit"
+    ]
+  },
+  "acceptance_scorecard": [
+    {"id": "correctness", "target": "All behavior and contract tests pass", "evidence": "uv run pytest"},
+    {"id": "coverage", "target": "At least 90 percent line coverage", "evidence": "pytest-cov gate"},
+    {"id": "performance", "target": "Warm synthetic p95 below 1000 ms", "evidence": "performance test"},
+    {"id": "privacy", "target": "Zero tracked private artifacts or detected secrets", "evidence": "scripts/check.sh privacy gate"},
+    {"id": "read_only", "target": "Zero mutation-capable SQLite connections or CLI commands", "evidence": "integration tests and source audit"},
+    {"id": "onboarding", "target": "Fresh-clone setup and validation are documented and executable", "evidence": "README and docs/onboarding.md"},
+    {"id": "workflow", "target": "Repo-local Go state validates on the exact pinned stack", "evidence": "./go validate ."}
+  ]
+}

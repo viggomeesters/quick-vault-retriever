@@ -1,0 +1,17 @@
+{
+  "schema": "go-workflow.repo-local.project.v1",
+  "kind": "project",
+  "id": "quick-vault-retriever",
+  "name": "Quick Vault Retriever",
+  "source_of_truth": "repo-local",
+  "contract_version": 2,
+  "project_mode": "project",
+  "required_stack_version": "0.3.14",
+  "stack_ref": "v0.3.14",
+  "default_verification": [
+    "make check"
+  ],
+  "links": {
+    "repo": "https://github.com/viggomeesters/quick-vault-retriever"
+  }
+}

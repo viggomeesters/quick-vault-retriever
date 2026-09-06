@@ -1,0 +1,47 @@
+{
+  "schema": "go-workflow.repo-local.hierarchy.v1",
+  "kind": "hierarchy",
+  "project": "quick-vault-retriever",
+  "epics": [
+    {
+      "id": "foundation",
+      "title": "Professional repository foundation",
+      "features": [
+        {
+          "id": "contracts",
+          "title": "Vision, design contract, documentation, public safety, and local gates",
+          "tasks": [
+            "QVR-F001"
+          ]
+        }
+      ],
+      "tasks": [
+        "QVR-F004"
+      ]
+    },
+    {
+      "id": "retrieval",
+      "title": "Read-only retrieval wedge",
+      "features": [
+        {
+          "id": "cli",
+          "title": "Fast general JSONL Vault query CLI",
+          "tasks": [
+            "QVR-F002",
+            "QVR-101",
+            "QVR-102"
+          ]
+        },
+        {
+          "id": "raycast",
+          "title": "Raycast Script Command adapter",
+          "tasks": [
+            "QVR-F003",
+            "QVR-103"
+          ]
+        }
+      ],
+      "tasks": []
+    }
+  ]
+}

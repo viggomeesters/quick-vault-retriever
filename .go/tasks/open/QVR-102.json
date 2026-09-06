@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "QVR-102",
+  "project": "quick-vault-retriever",
+  "status": "open",
+  "summary": "Add private latency and answer-quality benchmark tooling",
+  "description": "Provide opt-in local benchmark commands for p50/p95 latency, source alignment, ambiguity, and abstention without committing private questions or answers.",
+  "scope": {
+    "read": [
+      "src/**,tests/**"
+    ],
+    "modify": [
+      "src/**,tests/**,docs/**"
+    ]
+  },
+  "acceptance": [
+    "Benchmark accepts ignored local fixtures and emits redacted aggregate metrics"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

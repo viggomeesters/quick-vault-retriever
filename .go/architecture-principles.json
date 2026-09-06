@@ -1,0 +1,31 @@
+{
+  "schema": "go-workflow.repo-local.architecture-principles.v1",
+  "kind": "architecture_principles",
+  "project": "quick-vault-retriever",
+  "principles": [
+    {
+      "id": "read-only",
+      "statement": "All runtime access is immutable and query-only",
+      "rationale": "The tool is a retrieval surface, never a second writer",
+      "enforcement": "Open SQLite with mode=ro and query_only; expose no mutation command"
+    },
+    {
+      "id": "freshness-first",
+      "statement": "Stale evidence is a hard failure",
+      "rationale": "Fast wrong answers destroy trust",
+      "enforcement": "Require projection metadata to match the configured ledger watermark when supplied"
+    },
+    {
+      "id": "bounded-evidence",
+      "statement": "Return small inspectable evidence packets",
+      "rationale": "Bounded output improves privacy, latency, and downstream synthesis",
+      "enforcement": "Cap hits and snippets; emit stable source IDs"
+    },
+    {
+      "id": "public-safety",
+      "statement": "Repository artifacts contain synthetic data only",
+      "rationale": "The public project must never leak personal vault content",
+      "enforcement": "Secret scan, privacy tests, ignore runtime state and fixtures policy"
+    }
+  ]
+}

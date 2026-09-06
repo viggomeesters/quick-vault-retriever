@@ -1,0 +1,36 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "required",
+  "id": "QVR-F004",
+  "project": "quick-vault-retriever",
+  "status": "open",
+  "summary": "Complete public repository presentation, hero, release, and remote proof",
+  "description": "Finish the public-facing repository, validate visuals and privacy, create the GitHub repository and first release, and prove clean remote state.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "assets/**,README.md,docs/**,.github/**,.go/**"
+    ]
+  },
+  "acceptance": [
+    "Distinctive hero is rendered at the top of README and visually verified for clipping, overlap, contrast, legibility, and placeholder text",
+    "repo-complete public validate returns no hard blockers",
+    "Public GitHub remote, metadata, topics, main branch, v0.1.0 release, and clean pushed state are proven"
+  ],
+  "verification": [
+    "make check",
+    "python3 /Users/viggomeesters/.codex/skills/repo-complete/scripts/repo_complete_bootstrap.py --public --mode validate --kind cli --path . --remote-policy required --url-policy none --release-policy required --json"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

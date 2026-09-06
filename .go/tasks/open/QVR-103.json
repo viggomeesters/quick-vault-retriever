@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "QVR-103",
+  "project": "quick-vault-retriever",
+  "status": "open",
+  "summary": "Add portable adapters for other local-first launchers",
+  "description": "Generalize the thin adapter boundary after the Raycast wedge proves stable.",
+  "scope": {
+    "read": [
+      "raycast/**,src/**"
+    ],
+    "modify": [
+      "adapters/**,docs/**,tests/**"
+    ]
+  },
+  "acceptance": [
+    "Adapters remain thin and reuse the same evidence contract"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

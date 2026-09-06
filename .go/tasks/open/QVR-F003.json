@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "QVR-F003",
+  "project": "quick-vault-retriever",
+  "status": "open",
+  "summary": "Add a Raycast Script Command adapter and end-to-end examples",
+  "description": "Expose the retriever as a zero-write Raycast Script Command with configurable runtime and concise Markdown output.",
+  "scope": {
+    "read": [
+      "src/**,docs/**"
+    ],
+    "modify": [
+      "raycast/**,tests/**,README.md,docs/**,scripts/check.sh"
+    ]
+  },
+  "acceptance": [
+    "Raycast script accepts an arbitrary query argument and calls the packaged CLI without embedding private paths",
+    "Output includes bounded evidence and visible stale/not-found states",
+    "Shell behavior and documented installation are tested"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/viggomeesters/quick-vault-retriever/schemas/repo-vision-contract.schema.json",
+  "title": "Quick Vault Retriever repository vision contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "product", "architecture", "design_principles", "engineering_principles", "public_safety", "acceptance_scorecard"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": "1.0.0"},
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "north_star", "target_users", "promise", "wedge", "principles", "non_goals", "assumptions", "success_criteria"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "north_star": {"type": "string", "minLength": 20},
+        "target_users": {"$ref": "#/$defs/nonEmptyStrings"},
+        "promise": {"type": "string", "minLength": 20},
+        "wedge": {"type": "string", "minLength": 20},
+        "principles": {"$ref": "#/$defs/nonEmptyStrings"},
+        "non_goals": {"$ref": "#/$defs/nonEmptyStrings"},
+        "assumptions": {"$ref": "#/$defs/nonEmptyStrings"},
+        "success_criteria": {"$ref": "#/$defs/nonEmptyStrings"}
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_context", "components", "data_flow", "trust_boundaries", "decisions"],
+      "properties": {
+        "system_context": {"type": "string", "minLength": 20},
+        "components": {"$ref": "#/$defs/nonEmptyStrings"},
+        "data_flow": {"$ref": "#/$defs/nonEmptyStrings"},
+        "trust_boundaries": {"$ref": "#/$defs/nonEmptyStrings"},
+        "decisions": {"$ref": "#/$defs/nonEmptyStrings"}
+      }
+    },
+    "design_principles": {"$ref": "#/$defs/nonEmptyStrings"},
+    "engineering_principles": {"$ref": "#/$defs/nonEmptyStrings"},
+    "public_safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "forbidden", "controls"],
+      "properties": {
+        "allowed": {"$ref": "#/$defs/nonEmptyStrings"},
+        "forbidden": {"$ref": "#/$defs/nonEmptyStrings"},
+        "controls": {"$ref": "#/$defs/nonEmptyStrings"}
+      }
+    },
+    "acceptance_scorecard": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "target", "evidence"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "target": {"type": "string", "minLength": 5},
+          "evidence": {"type": "string", "minLength": 3}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 3, "uniqueItems": true}
+    }
+  }
+}

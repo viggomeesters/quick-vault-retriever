@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.repo-local.vision.v1",
+  "kind": "vision",
+  "project": "quick-vault-retriever",
+  "status": "active",
+  "north_star": "Make private local knowledge as fast and dependable to query as a calculator, without turning retrieval into an unbounded agent.",
+  "wedge": "A read-only Python CLI and Raycast Script Command that return bounded, source-cited evidence from a fresh local JSONL Vault index.",
+  "target_user": "People who keep a local JSONL-first knowledge vault and need immediate answers from Raycast or a terminal.",
+  "core_promise": "Turn a natural-language vault query into inspectable evidence in seconds while preserving local ownership and safe abstention.",
+  "product_principles": [
+    "Retrieval owns evidence; optional models may summarize but never invent or expand authority.",
+    "Fast failure is better than a plausible answer from stale or missing evidence.",
+    "Public code and tests use only synthetic data; private vault content never enters Git."
+  ],
+  "non_goals": [
+    "Mutating canonical vault data.",
+    "Running a general-purpose agent over the vault.",
+    "Replacing the canonical JSONL Vault writer, indexer, or validation contract.",
+    "Optimizing only for entity or contact questions."
+  ],
+  "success_metrics": [
+    "A fresh-index query returns bounded cited evidence with p95 latency below one second on the target Mac.",
+    "Missing and ambiguous questions abstain instead of returning unrelated facts.",
+    "A fresh clone can install, validate, test, and add the Raycast command from documented steps."
+  ]
+}

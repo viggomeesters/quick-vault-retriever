@@ -1,0 +1,82 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "repository-foundation",
+  "project": "quick-vault-retriever",
+  "title": "Public repository and product-contract boundary",
+  "status": "accepted",
+  "owner": "Quick Vault Retriever maintainers",
+  "outcomes": [
+    "Users can query a local JSONL Vault quickly through a small read-only CLI and Raycast adapter.",
+    "Public repository artifacts remain reproducible and contain no private vault data."
+  ],
+  "scope": {
+    "in": [
+      "Read-only SQLite FTS retrieval",
+      "Bounded cited evidence packets",
+      "Raycast Script Command adapter",
+      "Public documentation and synthetic tests"
+    ],
+    "out": [
+      "Canonical vault mutations",
+      "Private vault fixtures or query logs",
+      "General-purpose agent execution",
+      "Cloud answer synthesis in the initial release"
+    ],
+    "systems": [
+      "Python CLI",
+      "Local JSONL Vault SQLite projection",
+      "Raycast Script Command"
+    ],
+    "boundaries": [
+      "Private local runtime boundary",
+      "Public source repository boundary",
+      "Canonical JSONL Vault writer boundary"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "vault owner",
+      "concerns": ["speed", "privacy", "correctness", "clear abstention"],
+      "decision_rights": ["choose runtime", "allow optional inference", "accept privacy risk"]
+    },
+    {
+      "role": "maintainer",
+      "concerns": ["portability", "testability", "public safety"],
+      "decision_rights": ["accept retrieval contracts and releases"]
+    }
+  ],
+  "constraints": [
+    "The CLI opens the derived SQLite projection read-only and never writes canonical vault state.",
+    "The first release performs deterministic retrieval only and invokes no cloud model.",
+    "Public fixtures are synthetic and private runtime paths are configured outside Git.",
+    "A stale or structurally incompatible index fails closed."
+  ],
+  "quality_attributes": [
+    {
+      "id": "private-data-leakage",
+      "scenario": "Repository artifacts are prepared for public release.",
+      "measure": "Tracked secrets, personal records, private queries, or absolute vault paths",
+      "threshold": 0
+    },
+    {
+      "id": "invalid-design-contracts",
+      "scenario": "A maintainer changes the versioned product or design contract.",
+      "measure": "Invalid committed docs/vision.json contracts accepted by the local gate",
+      "threshold": 0
+    },
+    {
+      "id": "workflow-bootstrap-failures",
+      "scenario": "A developer starts from a fresh clone and invokes the repo-local workflow.",
+      "measure": "Pinned workflow validation failures after documented bootstrap",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "OR-style full-text matching can surface a strong hit for only part of a multi-term question.",
+    "A synchronized or copied index can become stale relative to canonical JSONL state.",
+    "Raycast output and shell diagnostics can accidentally expose private evidence."
+  ],
+  "open_questions": [],
+  "decision_ids": ["QVR-ADR-001"]
+}
