@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "retrieval-runtime",
+  "project": "quick-vault-retriever",
+  "title": "Bounded local retrieval runtime",
+  "status": "accepted",
+  "owner": "Quick Vault Retriever maintainers",
+  "outcomes": [
+    "Arbitrary natural-language queries return fast, bounded, inspectable evidence or a safe abstention."
+  ],
+  "scope": {
+    "in": ["CLI contract", "FTS5 retrieval", "freshness validation", "evidence rendering", "Raycast adapter"],
+    "out": ["Vault writes", "index production", "model inference", "private query persistence"],
+    "systems": ["Python CLI", "SQLite FTS5 projection", "Raycast Script Command"],
+    "boundaries": ["Read-only database boundary", "Public evidence-packet contract", "Local private output boundary"]
+  },
+  "stakeholders": [
+    {"role": "vault user", "concerns": ["speed", "relevance", "privacy"], "decision_rights": ["select runtime and query"]},
+    {"role": "integrator", "concerns": ["stable schema", "exit codes", "bounded output"], "decision_rights": ["choose output format"]}
+  ],
+  "constraints": [
+    "Runtime dependencies remain standard-library only.",
+    "SQLite is opened with immutable read-only URI flags and query_only enabled.",
+    "Retrieval must not assume an entity-specific question shape.",
+    "Successful evidence always carries a stable record citation."
+  ],
+  "quality_attributes": [
+    {"id": "fresh-query-latency", "scenario": "A broad query runs against a warm synthetic compatible index.", "measure": "p95 query latency in milliseconds", "threshold": 1000},
+    {"id": "unsupported-answer-rate", "scenario": "No record matches the query.", "measure": "Successful answers without a citation", "threshold": 0},
+    {"id": "mutation-surface", "scenario": "The CLI accesses a production projection.", "measure": "Mutation-capable database connections or commands", "threshold": 0},
+    {"id": "general-query-coverage", "scenario": "Queries target decisions, projects, events, tasks, documents, and people.", "measure": "Supported synthetic query categories", "threshold": 6}
+  ],
+  "risks": [
+    "High-recall OR matching can favor partial generic matches.",
+    "Snippet generation may disclose more text than needed.",
+    "Index contract changes can cause silent misreads without structural validation."
+  ],
+  "open_questions": [],
+  "decision_ids": ["QVR-ADR-001"]
+}
