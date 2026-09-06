@@ -50,17 +50,20 @@ records and filesystem paths. A hit includes a short snippet, record type, relev
 3. Open `<runtime>/indexes/vault.sqlite` read-only.
 4. Validate `records`, `record_fts`, and `projection_metadata` compatibility.
 5. Compare a supplied ledger watermark with projection metadata.
-6. Match tokens with FTS5 OR semantics, then re-rank by term coverage and FTS score.
-7. Return a bounded evidence packet or explicit `not_found`/`stale` state.
+6. Try a full-coverage FTS5 AND query first; use bounded OR retrieval only when no full match exists.
+7. Re-rank fallback evidence by term coverage and FTS score.
+8. Return a bounded evidence packet or explicit `partial`/`not_found`/`stale` state.
 
-OR retrieval preserves recall for ordinary questions; coverage-first re-ranking prevents a record
-matching one generic term from silently outranking a record matching the complete query.
+The AND-first path keeps common terms fast on large indexes. Bounded OR fallback preserves recall;
+coverage-first re-ranking and the `partial` state prevent a record matching one generic term from
+silently becoming a fully supported result.
 
 ## Failure model
 
 | State | Meaning | CLI exit |
 |---|---|---:|
 | `ok` | At least one cited evidence hit | 0 |
+| `partial` | Evidence exists, but no record covers every meaningful term | 6 |
 | `not_found` | Compatible fresh index, no evidence | 4 |
 | `invalid_request` | Empty/unsafe query or invalid option | 2 |
 | `unavailable` | Index missing, unreadable, or incompatible | 3 |

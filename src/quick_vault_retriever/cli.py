@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sqlite3
 import sys
@@ -208,10 +209,38 @@ def parser() -> argparse.ArgumentParser:
     subcommands = root.add_subparsers(dest="command", required=True)
     query = subcommands.add_parser("query", help="retrieve bounded evidence")
     query.add_argument("query")
-    query.add_argument("--runtime", type=Path, required=True)
+    query.add_argument("--runtime", type=Path)
     query.add_argument("--format", choices=("json", "markdown"), default="markdown")
     query.add_argument("--limit", type=int, choices=range(1, 21), default=5, metavar="1..20")
     return root
+
+
+def configured_runtime(cli_value: Path | None) -> Path:
+    """Resolve runtime from the CLI, environment, or private user config."""
+    if cli_value is not None:
+        return cli_value.expanduser()
+    environment = os.environ.get("QUICK_VAULT_RUNTIME", "").strip()
+    if environment:
+        return Path(environment).expanduser()
+    config_path = Path(
+        os.environ.get(
+            "QUICK_VAULT_CONFIG",
+            "~/.config/quick-vault-retriever/config.json",
+        )
+    ).expanduser()
+    if config_path.is_file():
+        try:
+            payload = json.loads(config_path.read_text(encoding="utf-8"))
+            runtime = str(payload.get("runtime") or "").strip()
+        except (json.JSONDecodeError, OSError) as error:
+            raise RetrievalError("invalid_request", "runtime config is invalid", 2) from error
+        if runtime:
+            return Path(runtime).expanduser()
+    raise RetrievalError(
+        "invalid_request",
+        "runtime is required via --runtime, QUICK_VAULT_RUNTIME, or private config",
+        2,
+    )
 
 
 def render_markdown(result: dict[str, Any]) -> str:
@@ -244,7 +273,7 @@ def main(argv: list[str] | None = None) -> int:
     """Run the CLI and return its stable exit code."""
     args = parser().parse_args(argv)
     try:
-        result = retrieve(args.runtime.expanduser(), args.query, args.limit)
+        result = retrieve(configured_runtime(args.runtime), args.query, args.limit)
         output = (
             json.dumps(result, ensure_ascii=False, sort_keys=True)
             if args.format == "json"

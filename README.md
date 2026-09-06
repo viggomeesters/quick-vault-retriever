@@ -45,8 +45,8 @@ Machine-readable output:
 uv run quick-vault query "project context" --runtime /path/to/default --format json
 ```
 
-The Raycast adapter and its installation steps are documented in
-[`docs/raycast.md`](docs/raycast.md).
+The [`raycast/query-vault.sh`](raycast/query-vault.sh) adapter and installation steps are documented
+in [`docs/raycast.md`](docs/raycast.md).
 
 ## Architecture
 

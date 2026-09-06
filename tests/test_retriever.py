@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import statistics
 import time
@@ -212,6 +213,79 @@ def test_cli_renders_markdown_evidence(tmp_path: Path, capsys: pytest.CaptureFix
     assert exit_code == 0
     assert "# Evidence" in output
     assert "jsonl://record/event.synthetic.launch" in output
+
+
+def test_cli_uses_runtime_environment_when_flag_is_omitted(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = build_runtime(
+        tmp_path,
+        [
+            {
+                "id": "task.synthetic.env",
+                "record_type": "task",
+                "title": "Environment",
+                "content": "Environment configuration keeps launchers thin.",
+            }
+        ],
+    )
+    monkeypatch.setenv("QUICK_VAULT_RUNTIME", os.fspath(runtime))
+
+    exit_code = main(["query", "environment configuration", "--format", "json"])
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["status"] == "ok"
+
+
+def test_cli_uses_private_config_when_flag_and_environment_are_omitted(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = build_runtime(
+        tmp_path,
+        [
+            {
+                "id": "source.synthetic.config",
+                "record_type": "source",
+                "title": "Private config",
+                "content": "Private config selects the local runtime.",
+            }
+        ],
+    )
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"runtime": os.fspath(runtime)}), encoding="utf-8")
+    monkeypatch.delenv("QUICK_VAULT_RUNTIME", raising=False)
+    monkeypatch.setenv("QUICK_VAULT_CONFIG", os.fspath(config))
+
+    exit_code = main(["query", "private config", "--format", "json"])
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["status"] == "ok"
+
+
+def test_missing_or_invalid_private_config_returns_invalid_request(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = tmp_path / "config.json"
+    monkeypatch.delenv("QUICK_VAULT_RUNTIME", raising=False)
+    monkeypatch.setenv("QUICK_VAULT_CONFIG", os.fspath(config))
+    missing_exit = main(["query", "private config", "--format", "json"])
+    missing = json.loads(capsys.readouterr().out)
+    config.write_text("not-json", encoding="utf-8")
+    invalid_exit = main(["query", "private config", "--format", "json"])
+    invalid = json.loads(capsys.readouterr().out)
+
+    assert missing_exit == 2
+    assert missing["status"] == "invalid_request"
+    assert invalid_exit == 2
+    assert invalid["status"] == "invalid_request"
 
 
 def test_cli_renders_partial_warning(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

@@ -5,9 +5,11 @@ read-only FTS5 projection, and leaves as bounded cited evidence.
 
 ## Builder route
 
-1. Start at `src/quick_vault_retriever/cli.py` for the public command.
-2. Follow retrieval into `retriever.py` and result contracts in `models.py`.
-3. Read `tests/test_cli.py` for user-visible states and `tests/test_retriever.py` for ranking.
+1. Start at `src/quick_vault_retriever/cli.py`; the intentionally small module owns the public
+   command, retrieval, result contract, and renderer.
+2. Read `tests/test_cli.py` for the subprocess contract and `tests/test_retriever.py` for ranking,
+   freshness, privacy, and failure states.
+3. Read `tests/test_raycast.py` for the launcher boundary.
 4. Run `make check` after changes.
 
 ## Reviewer route

@@ -1,0 +1,89 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "QVR-F003",
+  "project": "quick-vault-retriever",
+  "status": "done",
+  "summary": "Add a Raycast Script Command adapter and end-to-end examples",
+  "description": "Expose the retriever as a zero-write Raycast Script Command with configurable runtime and concise Markdown output.",
+  "scope": {
+    "read": [
+      "src/**,docs/**"
+    ],
+    "modify": [
+      "raycast/**,tests/**,README.md,docs/**,scripts/check.sh"
+    ]
+  },
+  "acceptance": [
+    "Raycast script accepts an arbitrary query argument and calls the packaged CLI without embedding private paths",
+    "Output includes bounded evidence and visible stale/not-found states",
+    "Shell behavior and documented installation are tested"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-06T19:10:01+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-06T19:13:45+02:00",
+      "task_id": "QVR-F003",
+      "agent": "codex",
+      "summary": "changed_files=raycast/query-vault.sh, docs/raycast.md, CLI private config fallback, adapter tests and architecture docs; RED=Raycast script missing and runtime omission rejected; GREEN=focused adapter and environment tests passed; verification=make check; result=passed; regression=33 tests passed, 97.50 percent coverage; smoke=real configured adapter completed in 0.81 seconds with output suppressed; install=private config outside Git plus symlink in existing Raycast scripts directory; critic=passed, adapter contains no SQL, runtime path, network call, or mutation and preserves visible partial/not-found states; runtime=codex",
+      "changed_files": [
+        "raycast/query-vault.sh",
+        "docs/raycast.md",
+        "CLI private config fallback",
+        "adapter tests and architecture docs"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "make check",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed, adapter contains no SQL, runtime path, network call, or mutation and preserves visible partial/not-found states",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "retrieval-runtime"
+    ],
+    "concerns": [
+      "Raycast integration and local configuration boundary"
+    ],
+    "decision_ids": [
+      "QVR-ADR-001"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}
