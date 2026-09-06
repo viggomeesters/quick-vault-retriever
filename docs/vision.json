@@ -1,91 +1,116 @@
 {
-  "$schema": "../schemas/repo-vision-contract.schema.json",
+  "$schema": "https://viggomeesters.github.io/schemas/repo-vision-contract.schema.json",
   "schema_version": "1.0.0",
-  "product": {
+  "artifact_kind": "repo_design_vision_contract",
+  "repo": {
     "name": "Quick Vault Retriever",
-    "north_star": "Make private local knowledge as fast and dependable to query as a calculator, without turning retrieval into an unbounded agent.",
-    "target_users": [
+    "primary_users": [
       "People with a local JSONL-first knowledge vault",
-      "Raycast users who need immediate evidence while staying in their current workflow",
+      "Raycast users who need immediate evidence in their current workflow",
       "Developers integrating a bounded local retrieval primitive"
     ],
+    "product_surface": "A read-only Python CLI and thin Raycast Script Command over a compatible SQLite FTS5 projection.",
+    "architecture": {
+      "system_context": "A local retrieval surface between Raycast or a shell and a derived JSONL Vault SQLite projection.",
+      "components": [
+        "Python command-line interface",
+        "General FTS5 evidence retriever",
+        "Projection compatibility and freshness gate",
+        "Markdown and JSON renderers",
+        "Thin Raycast Script Command"
+      ],
+      "data_flow": [
+        "An arbitrary natural-language query enters through Raycast or the terminal.",
+        "The CLI validates and tokenizes the query without persisting it.",
+        "The retriever opens the projection in immutable query-only mode.",
+        "Compatibility and ledger freshness are checked before FTS retrieval.",
+        "Coverage-ranked bounded snippets leave as a versioned cited evidence packet."
+      ],
+      "trust_boundaries": [
+        "Private query and SQLite projection remain local.",
+        "Canonical JSONL and its writer are outside process authority.",
+        "Public Git contains only source, contracts, documentation, and synthetic fixtures.",
+        "Any future model provider is a separate opt-in boundary."
+      ]
+    }
+  },
+  "vision": {
+    "one_line": "Fast, bounded, source-cited evidence from a local JSONL Vault without waking a general-purpose agent.",
+    "north_star": "Make private local knowledge as fast and dependable to query as a calculator, without turning retrieval into an unbounded agent.",
     "promise": "Turn a natural-language vault query into inspectable, source-cited evidence in seconds while preserving local ownership and safe abstention.",
-    "wedge": "A read-only Python CLI and Raycast Script Command over a compatible SQLite FTS5 projection.",
-    "principles": [
-      "Retrieval owns evidence; optional models may summarize but never invent or expand authority.",
-      "Fast failure is better than a plausible answer from stale or missing evidence.",
-      "The query model is general; entity lookup is one use case rather than the architecture.",
-      "Private runtime state stays local and public artifacts stay synthetic."
-    ],
-    "non_goals": [
-      "Mutating canonical JSONL or human-owned notes",
-      "Operating a general-purpose vault agent",
-      "Producing or repairing the SQLite projection",
-      "Shipping cloud or local-model synthesis in version 0.1",
-      "Optimizing exclusively for contacts, people, or entity properties"
-    ],
+    "wedge": "A read-only Python CLI and Raycast Script Command over an existing SQLite FTS5 projection.",
     "assumptions": [
       "The caller has a locally accessible compatible SQLite FTS5 projection.",
       "Stable JSONL record IDs are meaningful citations for local use.",
       "A bounded evidence result is useful without conversational synthesis.",
-      "The caller can supply a canonical ledger watermark when strict freshness is required."
+      "The canonical ledger can be read to enforce projection freshness."
     ],
     "success_criteria": [
-      "Warm synthetic p95 retrieval latency is below 1000 ms on the target Mac.",
+      "Warm retrieval p95 is below 1000 ms on the target Mac.",
       "Every successful hit includes a stable record citation.",
       "Missing evidence produces not_found with no fabricated answer.",
       "Fresh-clone setup and make check succeed from documented commands.",
       "No private record, absolute vault path, secret, or generated runtime artifact is tracked."
     ]
   },
-  "architecture": {
-    "system_context": "A local read-only retrieval surface between Raycast or a shell and a derived JSONL Vault SQLite projection.",
-    "components": [
-      "Python command-line interface",
-      "General FTS5 evidence retriever",
-      "Projection compatibility and freshness gate",
-      "Markdown and JSON renderers",
-      "Thin Raycast Script Command"
-    ],
-    "data_flow": [
-      "An arbitrary natural-language query enters through Raycast or the terminal.",
-      "The CLI validates and tokenizes the query without persisting it.",
-      "The retriever opens the projection in immutable query-only mode.",
-      "Compatibility and optional ledger freshness are checked before FTS retrieval.",
-      "Coverage-ranked, bounded snippets leave as a versioned cited evidence packet."
-    ],
-    "trust_boundaries": [
-      "Private query and SQLite projection remain local.",
-      "Canonical JSONL and its writer are outside process authority.",
-      "Public Git contains only source, contracts, documentation, and synthetic fixtures.",
-      "Any future model provider is a separate opt-in boundary."
-    ],
-    "decisions": [
-      "Use SQLite FTS5 because the canonical vault already produces a local projection.",
-      "Use deterministic retrieval before considering model synthesis.",
-      "Keep Raycast thin so the CLI contract remains independently testable and portable.",
-      "Use local gates instead of GitHub Actions."
-    ]
-  },
-  "design_principles": [
-    "Show the answer state before controls or implementation detail.",
-    "Keep successful output concise enough to scan in Raycast.",
-    "Make citations, freshness, ambiguity, and failure states visible.",
-    "Prefer a calm text surface over a dashboard for one-shot questions."
+  "principles": [
+    {
+      "id": "agent-first",
+      "title": "A bounded product surface for humans and agents",
+      "category": "design",
+      "rule": "Return a small versioned evidence packet that is easy to inspect and safe to compose.",
+      "good": ["Stable JSON output", "short Raycast output", "explicit result state and citations"],
+      "bad": ["unbounded context dumps", "hidden state", "a general-purpose agent shell"]
+    },
+    {
+      "id": "json-first",
+      "title": "Machine-readable contracts before prose interpretation",
+      "category": "engineering",
+      "rule": "Version evidence and vision contracts as JSON and validate them locally.",
+      "good": ["JSON Schema", "synthetic fixtures", "stable exit codes"],
+      "bad": ["prose-only behavior", "unversioned output", "private fixtures"]
+    },
+    {
+      "id": "fail-closed",
+      "title": "Fast failure beats plausible invention",
+      "category": "design",
+      "rule": "Expose missing, partial, stale, or incompatible evidence rather than guessing an answer.",
+      "good": ["not_found", "partial", "stale", "unavailable"],
+      "bad": ["unsupported answers", "silent fallback", "stale evidence presented as current"]
+    },
+    {
+      "id": "least-authority",
+      "title": "Retrieval never becomes mutation",
+      "category": "engineering",
+      "rule": "Open the derived projection immutable and query-only while keeping the canonical writer outside process authority.",
+      "good": ["mode=ro", "immutable=1", "PRAGMA query_only", "read-only integration tests"],
+      "bad": ["write-capable connections", "index repair", "canonical JSONL mutation"]
+    },
+    {
+      "id": "general-query-model",
+      "title": "Questions are broader than entities",
+      "category": "design",
+      "rule": "Treat contact lookup as one query class among decisions, projects, events, tasks, sources, and other records.",
+      "good": ["arbitrary text input", "coverage-first ranking", "cross-record-type tests"],
+      "bad": ["person-only routing", "address-specific schemas", "entity-specific architecture"]
+    },
+    {
+      "id": "local-first-performance",
+      "title": "Use the cheapest deterministic path first",
+      "category": "engineering",
+      "rule": "Query the existing local FTS projection before considering optional model synthesis.",
+      "good": ["bounded AND-first FTS", "measured p95 latency", "zero default network calls"],
+      "bad": ["agent startup for every lookup", "cloud-required retrieval", "unmeasured latency claims"]
+    }
   ],
-  "engineering_principles": [
-    "Test behavior through the CLI and evidence-packet contract.",
-    "Open data stores with least authority and fail closed on contract drift.",
-    "Keep dependencies minimal and use the Python standard library at runtime.",
-    "Version public output schemas and preserve stable exit codes.",
-    "Measure latency without committing private queries or results."
+  "non_goals": [
+    "Mutating canonical JSONL or human-owned notes",
+    "Operating a general-purpose vault agent",
+    "Producing or repairing the SQLite projection",
+    "Shipping cloud or local-model synthesis in version 0.1",
+    "Optimizing exclusively for contacts, people, or entity properties"
   ],
   "public_safety": {
-    "allowed": [
-      "Synthetic SQLite fixtures generated during tests",
-      "Generic example queries and placeholder runtime paths",
-      "Aggregate redacted performance measurements"
-    ],
     "forbidden": [
       "Real vault records or database copies",
       "Personal names, addresses, private queries, or screenshots",
@@ -93,20 +118,35 @@
       "Credentials, tokens, environment files, or key material",
       "Generated reports, caches, and local benchmark corpora"
     ],
-    "controls": [
-      "Repository ignore rules",
-      "Synthetic-fixture tests",
-      "Tracked-file privacy and secret scan",
-      "Git-history sensitive-filename and large-blob audit"
+    "required_boundaries": [
+      "Only synthetic SQLite fixtures may be committed.",
+      "The public repository contains no private runtime defaults.",
+      "Queries are not persisted by the product.",
+      "Tracked files and Git history are scanned before publication.",
+      "Future model synthesis must be separately opt-in and tool-less."
     ]
   },
   "acceptance_scorecard": [
-    {"id": "correctness", "target": "All behavior and contract tests pass", "evidence": "uv run pytest"},
-    {"id": "coverage", "target": "At least 90 percent line coverage", "evidence": "pytest-cov gate"},
-    {"id": "performance", "target": "Warm synthetic p95 below 1000 ms", "evidence": "performance test"},
-    {"id": "privacy", "target": "Zero tracked private artifacts or detected secrets", "evidence": "scripts/check.sh privacy gate"},
-    {"id": "read_only", "target": "Zero mutation-capable SQLite connections or CLI commands", "evidence": "integration tests and source audit"},
-    {"id": "onboarding", "target": "Fresh-clone setup and validation are documented and executable", "evidence": "README and docs/onboarding.md"},
-    {"id": "workflow", "target": "Repo-local Go state validates on the exact pinned stack", "evidence": "./go validate ."}
-  ]
+    {"id": "correctness", "question": "Do all behavior and contract tests pass?", "pass_condition": "uv run pytest passes."},
+    {"id": "coverage", "question": "Is critical behavior covered?", "pass_condition": "Line coverage is at least 90 percent."},
+    {"id": "performance", "question": "Is retrieval fast enough for Raycast?", "pass_condition": "Warm p95 is below 1000 ms on the target Mac."},
+    {"id": "privacy", "question": "Is the public history free of private artifacts and secrets?", "pass_condition": "Tracked-file and Git-history audits report no blockers."},
+    {"id": "read-only", "question": "Can the retriever mutate the projection or canonical vault?", "pass_condition": "Connections are immutable and query-only, and mutation regression tests pass."},
+    {"id": "onboarding", "question": "Can a fresh clone be understood and validated?", "pass_condition": "README and onboarding commands are complete and make check passes."},
+    {"id": "workflow", "question": "Is repository work durable and claimable?", "pass_condition": "The exact repo-local Go stack validates with ordered open tasks."}
+  ],
+  "review_checklist": [
+    "Does the change preserve read-only vault authority?",
+    "Does retrieval remain general rather than entity-specific?",
+    "Are output states, citations, privacy boundaries, and residual risks explicit?",
+    "Do make check and the public repo-complete profile pass?",
+    "Are claims backed by tests, runtime evidence, or remote readback?"
+  ],
+  "maturity_model": [
+    {"level": "L0", "state": "present", "meaning": "Vision, architecture, public-safety, and evidence contracts exist."},
+    {"level": "L1", "state": "tested", "meaning": "Schemas, behavior, privacy, and presentation are validated locally."},
+    {"level": "L2", "state": "operational", "meaning": "The CLI and Raycast adapter query a fresh real projection read-only."},
+    {"level": "L3", "state": "published", "meaning": "Public metadata, release artifacts, and clean remote state are independently readable."}
+  ],
+  "residual_risk_wording": "Deterministic retrieval returns inspectable evidence rather than a conversationally synthesized answer; optional synthesis remains unimplemented and must not be implied by version 0.1."
 }

@@ -9,6 +9,7 @@ uv run ruff check .
 if [ -d src ]; then uv run ty check src; fi
 if [ -d tests ]; then uv run pytest; fi
 uv run python scripts/validate_design.py
+uv run python scripts/validate_public.py
 bash -n go scripts/*.sh
 ./go validate .
 

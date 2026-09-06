@@ -5,7 +5,7 @@
   "shareable_delivery": "required",
   "id": "QVR-F004",
   "project": "quick-vault-retriever",
-  "status": "open",
+  "status": "active",
   "summary": "Complete public repository presentation, hero, release, and remote proof",
   "description": "Finish the public-facing repository, validate visuals and privacy, create the GitHub repository and first release, and prove clean remote state.",
   "scope": {
@@ -13,24 +13,44 @@
       "**"
     ],
     "modify": [
-      "assets/**,README.md,docs/**,.github/**,.go/**"
+      "assets/**",
+      "README.md",
+      "docs/**",
+      ".github/**",
+      "scripts/**",
+      ".go/**"
     ]
   },
   "acceptance": [
     "Distinctive hero is rendered at the top of README and visually verified for clipping, overlap, contrast, legibility, and placeholder text",
+    "The design is checked against guru-ai-engineer@2026.09 without fabricating unavailable expert-lens evidence",
     "repo-complete public validate returns no hard blockers",
     "Public GitHub remote, metadata, topics, main branch, v0.1.0 release, and clean pushed state are proven"
   ],
   "verification": [
     "make check",
-    "python3 /Users/viggomeesters/.codex/skills/repo-complete/scripts/repo_complete_bootstrap.py --public --mode validate --kind cli --path . --remote-policy required --url-policy none --release-policy required --json"
+    "python3 /Users/viggomeesters/Dev/viggo-agent-skills/scripts/repo_complete_bootstrap.py --public --mode validate --kind generic --path . --remote-policy required --url-policy none --release-policy required --json"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex",
+    "claimed_at": "2026-09-06T19:13:57+02:00"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
-  "evidence": []
+  "evidence": [],
+  "architecture": {
+    "impact": "foundational",
+    "scope_refs": [
+      "repository-foundation"
+    ],
+    "concerns": [
+      "Public repository identity, visual system, release, and remote publication"
+    ],
+    "decision_ids": [
+      "QVR-ADR-001"
+    ],
+    "conformance_required": true,
+    "human_gate": "risk_acceptance"
+  }
 }

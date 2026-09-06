@@ -1,73 +1,90 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/viggomeesters/quick-vault-retriever/schemas/repo-vision-contract.schema.json",
-  "title": "Quick Vault Retriever repository vision contract",
+  "$id": "https://viggomeesters.github.io/schemas/repo-vision-contract.schema.json",
+  "title": "Repo design vision contract",
+  "description": "Agent-first repository product/design contract used by repo-complete and repo-design-vision.",
   "type": "object",
-  "additionalProperties": false,
-  "required": ["$schema", "schema_version", "product", "architecture", "design_principles", "engineering_principles", "public_safety", "acceptance_scorecard"],
+  "required": ["$schema", "schema_version", "artifact_kind", "repo", "vision", "principles", "non_goals", "public_safety", "acceptance_scorecard", "review_checklist", "maturity_model", "residual_risk_wording"],
   "properties": {
-    "$schema": {"type": "string"},
-    "schema_version": {"const": "1.0.0"},
-    "product": {
+    "$schema": {"type": "string", "const": "https://viggomeesters.github.io/schemas/repo-vision-contract.schema.json"},
+    "schema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "artifact_kind": {"type": "string", "const": "repo_design_vision_contract"},
+    "repo": {
       "type": "object",
-      "additionalProperties": false,
-      "required": ["name", "north_star", "target_users", "promise", "wedge", "principles", "non_goals", "assumptions", "success_criteria"],
+      "required": ["name", "primary_users", "product_surface"],
       "properties": {
         "name": {"type": "string", "minLength": 1},
-        "north_star": {"type": "string", "minLength": 20},
-        "target_users": {"$ref": "#/$defs/nonEmptyStrings"},
-        "promise": {"type": "string", "minLength": 20},
-        "wedge": {"type": "string", "minLength": 20},
-        "principles": {"$ref": "#/$defs/nonEmptyStrings"},
-        "non_goals": {"$ref": "#/$defs/nonEmptyStrings"},
-        "assumptions": {"$ref": "#/$defs/nonEmptyStrings"},
-        "success_criteria": {"$ref": "#/$defs/nonEmptyStrings"}
-      }
+        "primary_users": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "product_surface": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
     },
-    "architecture": {
+    "vision": {
       "type": "object",
-      "additionalProperties": false,
-      "required": ["system_context", "components", "data_flow", "trust_boundaries", "decisions"],
+      "required": ["one_line", "north_star", "promise"],
       "properties": {
-        "system_context": {"type": "string", "minLength": 20},
-        "components": {"$ref": "#/$defs/nonEmptyStrings"},
-        "data_flow": {"$ref": "#/$defs/nonEmptyStrings"},
-        "trust_boundaries": {"$ref": "#/$defs/nonEmptyStrings"},
-        "decisions": {"$ref": "#/$defs/nonEmptyStrings"}
+        "one_line": {"type": "string", "minLength": 1},
+        "north_star": {"type": "string", "minLength": 1},
+        "promise": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
+    "principles": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "rule", "good", "bad"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "rule": {"type": "string", "minLength": 1},
+          "good": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "bad": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        },
+        "additionalProperties": true
       }
     },
-    "design_principles": {"$ref": "#/$defs/nonEmptyStrings"},
-    "engineering_principles": {"$ref": "#/$defs/nonEmptyStrings"},
+    "non_goals": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
     "public_safety": {
       "type": "object",
-      "additionalProperties": false,
-      "required": ["allowed", "forbidden", "controls"],
+      "required": ["forbidden", "required_boundaries"],
       "properties": {
-        "allowed": {"$ref": "#/$defs/nonEmptyStrings"},
-        "forbidden": {"$ref": "#/$defs/nonEmptyStrings"},
-        "controls": {"$ref": "#/$defs/nonEmptyStrings"}
-      }
+        "forbidden": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "required_boundaries": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": true
     },
     "acceptance_scorecard": {
       "type": "array",
-      "minItems": 5,
+      "minItems": 1,
       "items": {
         "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "target", "evidence"],
+        "required": ["id", "question", "pass_condition"],
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
-          "target": {"type": "string", "minLength": 5},
-          "evidence": {"type": "string", "minLength": 3}
-        }
+          "id": {"type": "string", "minLength": 1},
+          "question": {"type": "string", "minLength": 1},
+          "pass_condition": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
       }
-    }
-  },
-  "$defs": {
-    "nonEmptyStrings": {
+    },
+    "review_checklist": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "maturity_model": {
       "type": "array",
       "minItems": 1,
-      "items": {"type": "string", "minLength": 3, "uniqueItems": true}
-    }
-  }
+      "items": {
+        "type": "object",
+        "required": ["level", "state", "meaning"],
+        "properties": {
+          "level": {"type": "string", "minLength": 1},
+          "state": {"type": "string", "minLength": 1},
+          "meaning": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    },
+    "residual_risk_wording": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": true
 }

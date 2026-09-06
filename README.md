@@ -1,4 +1,10 @@
+<p align="center">
+  <img src="assets/hero.png" alt="A focused local evidence index drawing bounded signals from a private knowledge field" width="100%">
+</p>
+
 # Quick Vault Retriever
+
+**Fast evidence from your local JSONL Vault—without waking a general-purpose agent.**
 
 Quick Vault Retriever is a local-first command-line tool for querying a JSONL Vault SQLite
 projection from Raycast or a terminal. It returns small, source-cited evidence packets instead of
@@ -65,7 +71,9 @@ bounded evidence packet + jsonl://record/<id>
 
 The SQLite projection is derived state. Canonical JSONL ownership and all mutations remain outside
 this project. See [`docs/architecture.md`](docs/architecture.md) and
-[`docs/vision.json`](docs/vision.json).
+[`docs/vision.json`](docs/vision.json). The design has also been checked against the versioned
+[`guru-ai-engineer@2026.09` hard gates](docs/guru-benchmark-review.md); that review explicitly
+withholds a Guru Score until compatible expert-lens snapshots are available.
 
 ## Development
 
@@ -74,9 +82,10 @@ uv sync --all-groups
 make check
 ```
 
-The local gate validates formatting, lint, types, tests, coverage, design contracts, shell syntax,
-repository privacy, and repo-local Go workflow state. This project intentionally does not use
-GitHub Actions; validation is deterministic and repository-local.
+The local gate in [`scripts/check.sh`](scripts/check.sh) validates formatting, lint, types, tests,
+coverage, design contracts, shell syntax, repository privacy, and repo-local Go workflow state.
+This project intentionally does not use GitHub Actions; validation is deterministic and
+repository-local.
 
 Start with [`docs/onboarding.md`](docs/onboarding.md). Repository work is tracked in `.go/`; run
 `./go status . --json` to inspect the next claimable task.
