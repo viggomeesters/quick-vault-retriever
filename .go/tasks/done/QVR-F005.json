@@ -1,0 +1,75 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "QVR-F005",
+  "project": "quick-vault-retriever",
+  "status": "done",
+  "summary": "Normalize the dependency-ordered product backlog",
+  "description": "Make each open task scope machine-usable and order benchmark tooling before optional synthesis and portable adapters.",
+  "scope": {
+    "read": [
+      ".go/tasks/open/**"
+    ],
+    "modify": [
+      ".go/tasks/open/**",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Every open task has separate read and modify patterns, and task numbering expresses the intended dependency order."
+  ],
+  "verification": [
+    "./go validate .",
+    "./go status . --json"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-06T19:26:39+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-06T19:27:08+02:00",
+      "task_id": "QVR-F005",
+      "agent": "codex",
+      "summary": "changed_files=.go/tasks/open/QVR-101.json, .go/tasks/open/QVR-102.json, .go/tasks/open/QVR-103.json, .go task state; verification=./go validate . and ./go status . --json; result=valid, QVR-101 is next, scopes are separate patterns, sequence is benchmark tooling then synthesis then adapters; critic=mechanical workflow correction inspected directly; runtime=codex",
+      "changed_files": [
+        ".go/tasks/open/QVR-101.json",
+        ".go/tasks/open/QVR-102.json",
+        ".go/tasks/open/QVR-103.json",
+        ".go task state"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "./go validate . and ./go status . --json",
+        "result": "valid, QVR-101 is next, scopes are separate patterns, sequence is benchmark tooling then synthesis then adapters"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "mechanical workflow correction inspected directly",
+        "skip_reason": null
+      }
+    }
+  ]
+}

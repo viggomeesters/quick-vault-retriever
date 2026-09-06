@@ -6,19 +6,23 @@
   "id": "QVR-101",
   "project": "quick-vault-retriever",
   "status": "open",
-  "summary": "Evaluate optional tool-less answer synthesis providers",
-  "description": "Compare deterministic-only output with local and cloud tool-less synthesis using a private, non-committed evaluation corpus.",
+  "summary": "Add private latency and answer-quality benchmark tooling",
+  "description": "Provide opt-in local benchmark commands for p50/p95 latency, source alignment, ambiguity, and abstention without committing private questions or answers.",
   "scope": {
     "read": [
-      "src/**,tests/**,docs/**"
+      "src/**",
+      "tests/**",
+      "docs/**"
     ],
     "modify": [
-      "docs/**,src/**,tests/**"
+      "src/**",
+      "tests/**",
+      "docs/**"
     ]
   },
   "acceptance": [
-    "Provider boundary cannot access filesystem or tools",
-    "Privacy choice is explicit and disabled by default"
+    "Benchmark accepts ignored local fixtures and emits redacted aggregate metrics",
+    "Metrics cover latency, citation support, ambiguity, and abstention without persisting private inputs"
   ],
   "verification": [
     "make check"

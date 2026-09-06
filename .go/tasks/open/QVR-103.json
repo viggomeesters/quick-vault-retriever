@@ -10,10 +10,14 @@
   "description": "Generalize the thin adapter boundary after the Raycast wedge proves stable.",
   "scope": {
     "read": [
-      "raycast/**,src/**"
+      "raycast/**",
+      "src/**",
+      "docs/**"
     ],
     "modify": [
-      "adapters/**,docs/**,tests/**"
+      "adapters/**",
+      "docs/**",
+      "tests/**"
     ]
   },
   "acceptance": [
