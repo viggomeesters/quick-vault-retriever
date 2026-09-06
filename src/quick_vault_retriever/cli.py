@@ -13,6 +13,9 @@ import time
 from pathlib import Path
 from typing import Any
 
+from quick_vault_retriever.benchmark import BENCHMARK_SCHEMA, run_benchmark
+from quick_vault_retriever.errors import RetrievalError
+
 SCHEMA = "quick-vault.evidence-packet.v1"
 PROJECTION_SCHEMA = "jsonl-vault.sqlite-projection.v1"
 MIN_TOKEN_LENGTH = 2
@@ -41,15 +44,6 @@ STOPWORDS = {
     "who",
     "why",
 }
-
-
-class RetrievalError(Exception):
-    """A controlled retrieval failure with a public result state."""
-
-    def __init__(self, status: str, message: str, exit_code: int) -> None:
-        super().__init__(message)
-        self.status = status
-        self.exit_code = exit_code
 
 
 def query_terms(query: str) -> list[str]:
@@ -212,6 +206,11 @@ def parser() -> argparse.ArgumentParser:
     query.add_argument("--runtime", type=Path)
     query.add_argument("--format", choices=("json", "markdown"), default="markdown")
     query.add_argument("--limit", type=int, choices=range(1, 21), default=5, metavar="1..20")
+    benchmark = subcommands.add_parser("benchmark", help="measure retrieval with private fixtures")
+    benchmark.add_argument("--runtime", type=Path)
+    benchmark.add_argument("--fixtures", type=Path, required=True)
+    benchmark.add_argument("--repeat", type=int, choices=range(1, 101), default=3, metavar="1..100")
+    benchmark.add_argument("--limit", type=int, choices=range(1, 21), default=5, metavar="1..20")
     return root
 
 
@@ -273,6 +272,16 @@ def main(argv: list[str] | None = None) -> int:
     """Run the CLI and return its stable exit code."""
     args = parser().parse_args(argv)
     try:
+        if args.command == "benchmark":
+            report = run_benchmark(
+                configured_runtime(args.runtime),
+                args.fixtures.expanduser(),
+                repeat=args.repeat,
+                limit=args.limit,
+                retriever=retrieve,
+            )
+            print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+            return 0
         result = retrieve(configured_runtime(args.runtime), args.query, args.limit)
         output = (
             json.dumps(result, ensure_ascii=False, sort_keys=True)
@@ -282,6 +291,19 @@ def main(argv: list[str] | None = None) -> int:
         print(output)
         return {"ok": 0, "not_found": 4, "partial": 6}[result["status"]]
     except RetrievalError as error:
+        if args.command == "benchmark":
+            print(
+                json.dumps(
+                    {
+                        "schema": BENCHMARK_SCHEMA,
+                        "status": error.status,
+                        "message": str(error),
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                )
+            )
+            return error.exit_code
         payload = error_payload(error)
         output = (
             json.dumps(payload, ensure_ascii=False, sort_keys=True)

@@ -9,8 +9,10 @@ read-only FTS5 projection, and leaves as bounded cited evidence.
    command, retrieval, result contract, and renderer.
 2. Read `tests/test_cli.py` for the subprocess contract and `tests/test_retriever.py` for ranking,
    freshness, privacy, and failure states.
-3. Read `tests/test_raycast.py` for the launcher boundary.
-4. Run `make check` after changes.
+3. Read `tests/test_benchmark.py` and `docs/benchmarking.md` for the aggregate-only private
+   evaluation boundary.
+4. Read `tests/test_raycast.py` for the launcher boundary.
+5. Run `make check` after changes.
 
 ## Reviewer route
 

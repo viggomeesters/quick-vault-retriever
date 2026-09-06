@@ -1,0 +1,114 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "QVR-101",
+  "project": "quick-vault-retriever",
+  "status": "done",
+  "summary": "Add private latency and answer-quality benchmark tooling",
+  "description": "Provide opt-in local benchmark commands for p50/p95 latency, source alignment, ambiguity, and abstention without committing private questions or answers.",
+  "scope": {
+    "read": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "schemas/**"
+    ],
+    "modify": [
+      "src/**",
+      "tests/**",
+      "docs/**",
+      "schemas/**"
+    ]
+  },
+  "acceptance": [
+    "Benchmark accepts ignored local fixtures and emits redacted aggregate metrics",
+    "Metrics cover latency, citation support, ambiguity, and abstention without persisting private inputs"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-06T20:39:52+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-06T20:49:06+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Reviewed aggregate-only output, strict fixture validation, versioned JSON Schema, bounded execution, TDD evidence, real read-only smoke, and full local gate; no blocking correctness, privacy, or architecture findings.",
+      "transaction_id": "88d947342b6547e5a99b09aeb150a77d",
+      "delivery": {
+        "delivery_id": "retrieval-v1",
+        "html": ".go/deliveries/retrieval-v1/index.html",
+        "manifest": ".go/deliveries/retrieval-v1/manifest.json",
+        "source_sha256": "98bda9d05c222206ad5acad72c3b3eb29c5a1c9248a433f84c4af7781624d182",
+        "html_sha256": "531eeb31dbeeeb7598d0673e66949b42b15f874c4ab4abb604821395278bec9d"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-06T20:48:59+02:00",
+      "task_id": "QVR-101",
+      "agent": "codex",
+      "summary": "changed_files=src/quick_vault_retriever/benchmark.py, src/quick_vault_retriever/errors.py, src/quick_vault_retriever/cli.py, tests/test_benchmark.py, schemas/benchmark-report.schema.json, docs/benchmarking.md, docs/architecture.md, docs/onboarding.md, .go lifecycle and architecture events; verification=make check, uv build, live aggregate-only benchmark smoke, secret scan, git diff check, ./go validate .; result=37 tests passed, 96.67 percent coverage, wheel and sdist built, live status accuracy 1.0 with p95 594.109ms, privacy scan clean; tdd=RED missing benchmark command then GREEN redacted aggregate report; RED missing ambiguity and abstention metrics then GREEN category metrics; RED invalid fixture traceback then GREEN controlled exit 2; RED unbounded corpus then GREEN 1000-case limit; RED missing report schema then GREEN versioned validation; critic=no blocking findings, source alignment is explicitly documented as labeled citation recall rather than precision, empty categories report null, private values and paths never enter output; architecture=retrieval-runtime conformance passed against QVR-ADR-001; runtime=codex",
+      "changed_files": [
+        "src/quick_vault_retriever/benchmark.py",
+        "src/quick_vault_retriever/errors.py",
+        "src/quick_vault_retriever/cli.py",
+        "tests/test_benchmark.py",
+        "schemas/benchmark-report.schema.json",
+        "docs/benchmarking.md",
+        "docs/architecture.md",
+        "docs/onboarding.md",
+        ".go lifecycle and architecture events"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "make check, uv build, live aggregate-only benchmark smoke, secret scan, git diff check, ./go validate .",
+        "result": "37 tests passed, 96.67 percent coverage, wheel and sdist built, live status accuracy 1.0 with p95 594.109ms, privacy scan clean"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "no blocking findings, source alignment is explicitly documented as labeled citation recall rather than precision, empty categories report null, private values and paths never enter output",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "retrieval-runtime"
+    ],
+    "concerns": [
+      "Aggregate-only private benchmark interface and evaluation semantics"
+    ],
+    "decision_ids": [
+      "QVR-ADR-001"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

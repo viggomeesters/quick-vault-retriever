@@ -1,0 +1,60 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "retrieval-v1",
+  "project": {
+    "id": "quick-vault-retriever",
+    "name": "Quick Vault Retriever"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "retrieval",
+    "title": "Read-only retrieval wedge"
+  },
+  "release": {
+    "version": 1,
+    "status": "released",
+    "created_at": "2026-09-06T20:49:06+02:00",
+    "supersedes": null
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "passed"
+  },
+  "sections": {
+    "summary": "Delivery voor Read-only retrieval wedge.",
+    "delivered_scope": [
+      "Implement the general read-only JSONL Vault retriever CLI with TDD",
+      "Add private latency and answer-quality benchmark tooling",
+      "Add a Raycast Script Command adapter and end-to-end examples"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Implement the general read-only JSONL Vault retriever CLI with TDD",
+        "summary": "changed_files=src/quick_vault_retriever, tests, schemas/evidence-packet.schema.json, pyproject.toml, uv.lock, retrieval-runtime brief; RED=CLI module absent then partial-match and broad-OR behavior failed as expected; GREEN=focused tests passed; verification=make check; result=passed; regression=28 tests passed, 97.20 percent coverage; performance=real 1.5GB replica 20 warm runs p95 97.010ms max 419.066ms, sequence 214 fresh; build=wheel and sdist succeeded; critic=passed after replacing broad OR first-pass with full-coverage AND then bounded OR fallback; runtime=codex"
+      },
+      {
+        "label": "Add private latency and answer-quality benchmark tooling",
+        "summary": "changed_files=src/quick_vault_retriever/benchmark.py, src/quick_vault_retriever/errors.py, src/quick_vault_retriever/cli.py, tests/test_benchmark.py, schemas/benchmark-report.schema.json, docs/benchmarking.md, docs/architecture.md, docs/onboarding.md, .go lifecycle and architecture events; verification=make check, uv build, live aggregate-only benchmark smoke, secret scan, git diff check, ./go validate .; result=37 tests passed, 96.67 percent coverage, wheel and sdist built, live status accuracy 1.0 with p95 594.109ms, privacy scan clean; tdd=RED missing benchmark command then GREEN redacted aggregate report; RED missing ambiguity and abstention metrics then GREEN category metrics; RED invalid fixture traceback then GREEN controlled exit 2; RED unbounded corpus then GREEN 1000-case limit; RED missing report schema then GREEN versioned validation; critic=no blocking findings, source alignment is explicitly documented as labeled citation recall rather than precision, empty categories report null, private values and paths never enter output; architecture=retrieval-runtime conformance passed against QVR-ADR-001; runtime=codex"
+      },
+      {
+        "label": "Add a Raycast Script Command adapter and end-to-end examples",
+        "summary": "changed_files=raycast/query-vault.sh, docs/raycast.md, CLI private config fallback, adapter tests and architecture docs; RED=Raycast script missing and runtime omission rejected; GREEN=focused adapter and environment tests passed; verification=make check; result=passed; regression=33 tests passed, 97.50 percent coverage; smoke=real configured adapter completed in 0.81 seconds with output suppressed; install=private config outside Git plus symlink in existing Raycast scripts directory; critic=passed, adapter contains no SQL, runtime path, network call, or mutation and preserves visible partial/not-found states; runtime=codex"
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Evaluate optional tool-less answer synthesis providers",
+      "Add portable adapters for other local-first launchers"
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "98bda9d05c222206ad5acad72c3b3eb29c5a1c9248a433f84c4af7781624d182",
+    "html_sha256": "531eeb31dbeeeb7598d0673e66949b42b15f874c4ab4abb604821395278bec9d"
+  }
+}

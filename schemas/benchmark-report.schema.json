@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/viggomeesters/quick-vault-retriever/schemas/benchmark-report.schema.json",
+  "title": "Quick Vault aggregate benchmark report",
+  "oneOf": [
+    {"$ref": "#/$defs/success"},
+    {"$ref": "#/$defs/error"}
+  ],
+  "$defs": {
+    "rate": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "success": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "case_count", "sample_count", "latency_ms", "metrics", "evaluation_counts"],
+      "properties": {
+        "schema": {"const": "quick-vault.benchmark-report.v1"},
+        "case_count": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "sample_count": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "latency_ms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["p50", "p95"],
+          "properties": {
+            "p50": {"type": "number", "minimum": 0},
+            "p95": {"type": "number", "minimum": 0}
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status_accuracy", "source_alignment_rate", "ambiguity_accuracy", "abstention_accuracy"],
+          "properties": {
+            "status_accuracy": {"$ref": "#/$defs/rate"},
+            "source_alignment_rate": {"$ref": "#/$defs/rate"},
+            "ambiguity_accuracy": {"$ref": "#/$defs/rate"},
+            "abstention_accuracy": {"$ref": "#/$defs/rate"}
+          }
+        },
+        "evaluation_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "source_alignment", "ambiguity", "abstention"],
+          "properties": {
+            "status": {"type": "integer", "minimum": 1, "maximum": 1000},
+            "source_alignment": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "ambiguity": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "abstention": {"type": "integer", "minimum": 0, "maximum": 1000}
+          }
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "status", "message"],
+      "properties": {
+        "schema": {"const": "quick-vault.benchmark-report.v1"},
+        "status": {"enum": ["invalid_request", "unavailable", "stale"]},
+        "message": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

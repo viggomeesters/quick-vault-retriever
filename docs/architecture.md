@@ -32,6 +32,8 @@ owns canonical knowledge nor produces the index.
   a caller-supplied canonical watermark.
 - **Raycast adapter:** passes one arbitrary query and configured runtime path to the CLI. It contains
   no retrieval logic or private default paths.
+- **Private benchmark runner:** replays ignored local JSONL cases through the same retriever and
+  emits only aggregate latency, status, source-alignment, ambiguity, and abstention metrics.
 
 ## Data and trust boundaries
 
@@ -74,3 +76,7 @@ silently becoming a fully supported result.
 Optional synthesis must consume the evidence-packet contract, remain disabled by default, and live
 behind a tool-less provider boundary. Alternative launchers may call the CLI but must not duplicate
 ranking, freshness, or privacy policy.
+
+The benchmark runner is an evaluation consumer rather than a second retrieval path. It accepts no
+answer text, produces no per-case output, and has no persistence option; see
+[`benchmarking.md`](benchmarking.md).
