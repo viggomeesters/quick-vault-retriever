@@ -1,0 +1,114 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "QVR-105",
+  "project": "quick-vault-retriever",
+  "status": "done",
+  "summary": "Resolve address questions to concise cited answers",
+  "description": "Add a bounded deterministic address-intent retrieval path that searches subject evidence, extracts street-address candidates, ranks them by support and proximity, and renders a concise cited answer without model inference or private fixtures.",
+  "scope": {
+    "read": [
+      "src/**",
+      "tests/**",
+      "schemas/**",
+      "docs/**"
+    ],
+    "modify": [
+      "src/**",
+      "tests/**",
+      "schemas/**",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "A synthetic address question outranks lexical footer matches and returns the supported street address first",
+    "The answer remains bounded, cited, local, read-only, and sub-second"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-07T09:12:31+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-07T09:19:59+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Reviewed deterministic property routing, false-footer abstention, v2 evidence schema, read-only authority, real smoke timing with private output excluded, synthetic-only tests, and the full local gate; no blocking findings.",
+      "transaction_id": "b59b5ff1e6db4f63955303b8aeec681f",
+      "delivery": {
+        "delivery_id": "retrieval-v3",
+        "html": ".go/deliveries/retrieval-v3/index.html",
+        "manifest": ".go/deliveries/retrieval-v3/manifest.json",
+        "source_sha256": "f274782312af7056a2a8e4684e52d559a802893aca09979b07eafc5259500254",
+        "html_sha256": "7a99294e99dc0d46c3be4c660e8a75520f737d3ec8bd407ba7eeff86541896c7"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-07T09:19:59+02:00",
+      "task_id": "QVR-105",
+      "agent": "codex",
+      "summary": "changed_files=src/quick_vault_retriever/cli.py, tests/test_retriever.py, tests/test_cli.py, tests/test_benchmark.py, schemas/evidence-packet.schema.json, README.md, docs/architecture.md, docs/vision.json, .go lifecycle and architecture events; verification=make check, exact private Raycast smoke with output excluded from repository, privacy scan, git diff check, ./go validate .; result=40 tests passed, 96.81 percent coverage, real cited address answer returned in 0.81 seconds, privacy scan clean; tdd=RED lexical mail footer outranked address evidence then GREEN concise cited extracted value, RED footer-only address query reported ok then GREEN not_found abstention, RED evidence v1 rejected answer field then GREEN versioned v2 contract; critic=no blocking findings, property route is bounded and record-type agnostic, all answers retain stable citations, generic retrieval remains unchanged, private values excluded from Git; architecture=retrieval-runtime conformance passed against QVR-ADR-001; runtime=codex",
+      "changed_files": [
+        "src/quick_vault_retriever/cli.py",
+        "tests/test_retriever.py",
+        "tests/test_cli.py",
+        "tests/test_benchmark.py",
+        "schemas/evidence-packet.schema.json",
+        "README.md",
+        "docs/architecture.md",
+        "docs/vision.json",
+        ".go lifecycle and architecture events"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "make check, exact private Raycast smoke with output excluded from repository, privacy scan, git diff check, ./go validate .",
+        "result": "40 tests passed, 96.81 percent coverage, real cited address answer returned in 0.81 seconds, privacy scan clean"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "no blocking findings, property route is bounded and record-type agnostic, all answers retain stable citations, generic retrieval remains unchanged, private values excluded from Git",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "retrieval-runtime"
+    ],
+    "concerns": [
+      "Deterministic property-intent answer extraction and evidence ranking"
+    ],
+    "decision_ids": [
+      "QVR-ADR-001"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

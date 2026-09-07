@@ -114,7 +114,7 @@ def test_benchmark_measures_status_ambiguity_and_abstention(
                 "expected_citations": ["jsonl://record/decision.synthetic.migration"],
             },
             {
-                "query": "Alex address",
+                "query": "Alex project",
                 "expected_status": "partial",
                 "expected_citations": [],
             },

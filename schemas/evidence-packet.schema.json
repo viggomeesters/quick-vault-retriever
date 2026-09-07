@@ -4,9 +4,9 @@
   "title": "Quick Vault evidence packet",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "status", "query_hash", "terms", "count", "limit", "freshness", "elapsed_ms", "hits"],
+  "required": ["schema", "status", "query_hash", "terms", "count", "limit", "freshness", "elapsed_ms", "hits", "answer"],
   "properties": {
-    "schema": {"const": "quick-vault.evidence-packet.v1"},
+    "schema": {"const": "quick-vault.evidence-packet.v2"},
     "status": {"enum": ["ok", "partial", "not_found"]},
     "query_hash": {"type": "string", "pattern": "^[a-f0-9]{16}$"},
     "terms": {"type": "array", "maxItems": 12, "items": {"type": "string", "minLength": 2}, "uniqueItems": true},
@@ -41,6 +41,22 @@
           "score": {"type": "number"}
         }
       }
+    },
+    "answer": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "field", "text", "citation_uri"],
+          "properties": {
+            "kind": {"const": "extracted_value"},
+            "field": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+            "text": {"type": "string", "minLength": 1, "maxLength": 160},
+            "citation_uri": {"type": "string", "pattern": "^jsonl://record/.+"}
+          }
+        }
+      ]
     }
   }
 }

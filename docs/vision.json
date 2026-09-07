@@ -148,5 +148,5 @@
     {"level": "L2", "state": "operational", "meaning": "The CLI and Raycast adapter query a fresh real projection read-only."},
     {"level": "L3", "state": "published", "meaning": "Public metadata, release artifacts, and clean remote state are independently readable."}
   ],
-  "residual_risk_wording": "Deterministic retrieval returns inspectable evidence rather than a conversationally synthesized answer; optional synthesis remains unimplemented and must not be implied by version 0.1."
+  "residual_risk_wording": "Deterministic retrieval can return a concise cited value only for explicitly supported property patterns; broader conversational synthesis remains unimplemented and must not be implied by version 0.1."
 }

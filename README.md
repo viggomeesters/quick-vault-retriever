@@ -23,6 +23,8 @@ FTS projection using ordinary natural-language terms.
 - Freshness-aware: incompatible or stale projections fail closed when a ledger watermark is given.
 - Bounded: output limits hits and snippet length.
 - Cited: every hit carries its stable JSONL record identifier.
+- Direct when supported: recognized property questions can return a concise extracted value with
+  its citation; address lookup is the first supported property.
 - Honest: no matching evidence produces an explicit `not_found` result.
 - Local by default: version 0.1 performs no model or network call.
 

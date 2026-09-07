@@ -93,6 +93,66 @@ def test_full_term_matches_avoid_broader_partial_results(tmp_path: Path) -> None
     assert [hit["id"] for hit in payload["hits"]] == ["decision.synthetic.full"]
 
 
+def test_address_question_returns_concise_cited_address_before_footer_matches(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    runtime = build_runtime(
+        tmp_path,
+        [
+            {
+                "id": "note.synthetic.address-evidence",
+                "record_type": "note",
+                "title": "Moving day",
+                "content": "Nora meets everyone at Examplelaan 42 for moving day.",
+            },
+            {
+                "id": "note.synthetic.calendar-footer",
+                "record_type": "note",
+                "title": "Calendar invitation",
+                "content": (
+                    "Nora accepted the invitation. You receive this email at the adres "
+                    "calendar@example.test."
+                ),
+            },
+        ],
+    )
+
+    exit_code = main(["query", "Adres van Nora", "--runtime", str(runtime)])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert output.startswith("# Answer\n\n**Examplelaan 42**")
+    assert "jsonl://record/note.synthetic.address-evidence" in output
+    assert "calendar-footer" not in output
+    schema_path = Path(__file__).parents[1] / "schemas" / "evidence-packet.schema.json"
+    Draft202012Validator(json.loads(schema_path.read_text(encoding="utf-8"))).validate(
+        retrieve(runtime, "Adres van Nora", 5)
+    )
+
+
+def test_address_question_abstains_when_only_a_mail_footer_matches(tmp_path: Path) -> None:
+    runtime = build_runtime(
+        tmp_path,
+        [
+            {
+                "id": "note.synthetic.footer-only",
+                "record_type": "note",
+                "title": "Calendar invitation",
+                "content": (
+                    "Alex accepted the invitation. You receive this email at the adres "
+                    "calendar@example.test."
+                ),
+            }
+        ],
+    )
+
+    payload = retrieve(runtime, "Adres van Alex", 5)
+
+    assert payload["status"] == "not_found"
+    assert payload["answer"] is None
+    assert payload["hits"] == []
+
+
 def test_stale_projection_fails_closed(tmp_path: Path) -> None:
     runtime = build_runtime(tmp_path, [], sequence=7)
     ledger = runtime / "ledger" / "changes.jsonl"

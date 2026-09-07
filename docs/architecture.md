@@ -27,7 +27,9 @@ owns canonical knowledge nor produces the index.
 - **CLI:** validates arguments, resolves the configured runtime, chooses JSON or Markdown output,
   and maps result states to stable exit codes.
 - **Retriever:** tokenizes broad natural-language input, queries FTS5, ranks term coverage, and
-  returns bounded snippets. It does not assume the query targets a person or entity.
+  returns bounded snippets. For an explicitly recognized property question, it may extract one
+  bounded cited value from subject-matched evidence; this is record-type agnostic and currently
+  supports Dutch and English street-address questions.
 - **Freshness gate:** verifies the projection schema and optionally compares its ledger sequence to
   a caller-supplied canonical watermark.
 - **Raycast adapter:** passes one arbitrary query and configured runtime path to the CLI. It contains
@@ -52,9 +54,12 @@ records and filesystem paths. A hit includes a short snippet, record type, relev
 3. Open `<runtime>/indexes/vault.sqlite` read-only.
 4. Validate `records`, `record_fts`, and `projection_metadata` compatibility.
 5. Compare a supplied ledger watermark with projection metadata.
-6. Try a full-coverage FTS5 AND query first; use bounded OR retrieval only when no full match exists.
-7. Re-rank fallback evidence by term coverage and FTS score.
-8. Return a bounded evidence packet or explicit `partial`/`not_found`/`stale` state.
+6. For an explicitly recognized property term, retrieve bounded subject evidence and resolve a
+   supported value before generic lexical ranking.
+7. Otherwise, try a full-coverage FTS5 AND query first; use bounded OR retrieval only when no full
+   match exists.
+8. Re-rank fallback evidence by term coverage and FTS score.
+9. Return a bounded evidence packet or explicit `partial`/`not_found`/`stale` state.
 
 The AND-first path keeps common terms fast on large indexes. Bounded OR fallback preserves recall;
 coverage-first re-ranking and the `partial` state prevent a record matching one generic term from

@@ -115,7 +115,7 @@ def test_general_query_returns_bounded_cited_evidence(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
-    assert payload["schema"] == "quick-vault.evidence-packet.v1"
+    assert payload["schema"] == "quick-vault.evidence-packet.v2"
     assert payload["status"] == "ok"
     assert payload["count"] == 1
     assert payload["hits"][0]["id"] == "decision.synthetic.migration"
@@ -123,7 +123,7 @@ def test_general_query_returns_bounded_cited_evidence(tmp_path: Path) -> None:
     assert "migration" in payload["hits"][0]["snippet"].lower()
 
 
-def test_disjoint_partial_matches_are_not_reported_as_a_supported_answer(tmp_path: Path) -> None:
+def test_generic_disjoint_partial_matches_are_not_reported_as_supported(tmp_path: Path) -> None:
     runtime = build_runtime(
         tmp_path,
         [
@@ -134,17 +134,17 @@ def test_disjoint_partial_matches_are_not_reported_as_a_supported_answer(tmp_pat
                 "content": "Alex works on the community garden.",
             },
             {
-                "id": "note.synthetic.address",
+                "id": "note.synthetic.schedule",
                 "record_type": "note",
-                "title": "Delivery address",
-                "content": "The delivery address belongs to a different project.",
+                "title": "Delivery schedule",
+                "content": "The delivery schedule belongs to a different project.",
             },
         ],
     )
 
     result = run_cli(
         "query",
-        "What is Alex's address?",
+        "What is Alex's schedule?",
         "--runtime",
         str(runtime),
         "--format",

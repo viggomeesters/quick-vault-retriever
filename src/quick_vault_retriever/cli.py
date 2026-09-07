@@ -16,7 +16,7 @@ from typing import Any
 from quick_vault_retriever.benchmark import BENCHMARK_SCHEMA, run_benchmark
 from quick_vault_retriever.errors import RetrievalError
 
-SCHEMA = "quick-vault.evidence-packet.v1"
+SCHEMA = "quick-vault.evidence-packet.v2"
 PROJECTION_SCHEMA = "jsonl-vault.sqlite-projection.v1"
 MIN_TOKEN_LENGTH = 2
 STOPWORDS = {
@@ -44,6 +44,23 @@ STOPWORDS = {
     "who",
     "why",
 }
+ADDRESS_INTENT_TERMS = frozenset({"adres", "address", "woonadres"})
+ADDRESS_PATTERN = re.compile(
+    r"\b[\w'.-]+(?:straat|laan|weg|plein|gracht|singel|kade|dreef|hof|park|pad|"
+    r"steeg|markt|boulevard|street|road|avenue|drive)\s+\d{1,5}[a-z]?"
+    r"(?:[-/]\d+[a-z]?)?\b",
+    flags=re.IGNORECASE,
+)
+RETRIEVAL_SQL = """
+    SELECT f.id, f.record_type, f.content, r.json,
+           bm25(record_fts) AS score,
+           snippet(record_fts, 2, '**', '**', ' … ', 36) AS snippet
+    FROM record_fts AS f
+    JOIN records AS r ON r.id = f.id
+    WHERE record_fts MATCH ?
+    ORDER BY score
+    LIMIT ?
+    """
 
 
 def query_terms(query: str) -> list[str]:
@@ -111,6 +128,121 @@ def label_from_json(raw: str, fallback: str) -> str:
     return fallback
 
 
+def address_subject_terms(terms: list[str]) -> list[str]:
+    """Return the bounded subject terms for an explicit address question."""
+    if not ADDRESS_INTENT_TERMS.intersection(terms):
+        return []
+    return [term for term in terms if term not in ADDRESS_INTENT_TERMS]
+
+
+def address_evidence(
+    rows: list[sqlite3.Row], subject_terms: list[str], original_terms: list[str], limit: int
+) -> tuple[dict[str, str] | None, list[dict[str, Any]]]:
+    """Extract the closest cited street address from bounded subject evidence."""
+    candidates: list[tuple[int, float, str, str, str, sqlite3.Row]] = []
+    for row in rows:
+        content = str(row["content"] or "")
+        folded = content.casefold()
+        subject_positions = [
+            match.start()
+            for term in subject_terms
+            for match in re.finditer(re.escape(term), folded, flags=re.IGNORECASE)
+        ]
+        if not subject_positions:
+            continue
+        for match in ADDRESS_PATTERN.finditer(content):
+            address = match.group(0).strip()
+            proximity = min(abs(match.start() - position) for position in subject_positions)
+            candidates.append(
+                (
+                    proximity,
+                    float(row["score"]),
+                    str(row["id"]),
+                    address.casefold(),
+                    address,
+                    row,
+                )
+            )
+    if not candidates:
+        return None, []
+
+    candidates.sort(key=lambda item: (item[0], item[1], item[2], item[3]))
+    selected_address = candidates[0][3]
+    supporting = [candidate for candidate in candidates if candidate[3] == selected_address]
+    hits: list[dict[str, Any]] = []
+    for _, score, _, _, address, row in supporting[:limit]:
+        record_id = str(row["id"])
+        hits.append(
+            {
+                "id": record_id,
+                "record_type": str(row["record_type"]),
+                "label": label_from_json(str(row["json"]), record_id),
+                "citation_uri": f"jsonl://record/{record_id}",
+                "snippet": f"**{address}**",
+                "matched_terms": original_terms,
+                "term_coverage": 1.0,
+                "score": round(score, 6),
+            }
+        )
+    answer: dict[str, str] = {
+        "kind": "extracted_value",
+        "field": "address",
+        "text": supporting[0][4],
+        "citation_uri": str(hits[0]["citation_uri"]),
+    }
+    return answer, hits
+
+
+def fetch_rows(
+    connection: sqlite3.Connection, terms: list[str], candidate_limit: int
+) -> list[sqlite3.Row]:
+    """Fetch bounded full-coverage rows, falling back to OR only when needed."""
+    rows = connection.execute(RETRIEVAL_SQL, (fts_query(terms, "AND"), candidate_limit)).fetchall()
+    if rows:
+        return rows
+    return connection.execute(RETRIEVAL_SQL, (fts_query(terms), candidate_limit)).fetchall()
+
+
+def lexical_evidence(rows: list[sqlite3.Row], terms: list[str], limit: int) -> list[dict[str, Any]]:
+    """Rank bounded lexical rows by coverage and FTS score."""
+    ranked: list[tuple[int, float, sqlite3.Row, list[str]]] = []
+    for row in rows:
+        content = str(row["content"] or "").casefold()
+        matched = [term for term in terms if term in content]
+        ranked.append((len(matched), float(row["score"]), row, matched))
+    ranked.sort(key=lambda item: (-item[0], item[1], str(item[2]["id"])))
+
+    hits = []
+    for coverage, score, row, matched in ranked[:limit]:
+        record_id = str(row["id"])
+        hits.append(
+            {
+                "id": record_id,
+                "record_type": str(row["record_type"]),
+                "label": label_from_json(str(row["json"]), record_id),
+                "citation_uri": f"jsonl://record/{record_id}",
+                "snippet": str(row["snippet"] or "").strip()[:800],
+                "matched_terms": matched,
+                "term_coverage": round(coverage / len(terms), 3),
+                "score": round(score, 6),
+            }
+        )
+    return hits
+
+
+def query_evidence(
+    connection: sqlite3.Connection, terms: list[str], limit: int
+) -> tuple[dict[str, str] | None, list[dict[str, Any]]]:
+    """Choose the bounded property or generic lexical retrieval path."""
+    candidate_limit = min(max(limit * 8, 24), 160)
+    subject_terms = address_subject_terms(terms)
+    if subject_terms:
+        return address_evidence(
+            fetch_rows(connection, subject_terms, candidate_limit), subject_terms, terms, limit
+        )
+    return None, lexical_evidence(fetch_rows(connection, terms, candidate_limit), terms, limit)
+
+
 def retrieve(runtime: Path, query: str, limit: int) -> dict[str, Any]:
     """Retrieve bounded evidence from a compatible fresh runtime projection."""
     started = time.perf_counter()
@@ -134,48 +266,12 @@ def retrieve(runtime: Path, query: str, limit: int) -> dict[str, Any]:
         if projection_sequence != ledger_sequence:
             raise RetrievalError("stale", "vault projection is stale", 5)
 
-        candidate_limit = min(max(limit * 8, 24), 160)
-        sql = """
-            SELECT f.id, f.record_type, f.content, r.json,
-                   bm25(record_fts) AS score,
-                   snippet(record_fts, 2, '**', '**', ' … ', 36) AS snippet
-            FROM record_fts AS f
-            JOIN records AS r ON r.id = f.id
-            WHERE record_fts MATCH ?
-            ORDER BY score
-            LIMIT ?
-            """
-        rows = connection.execute(sql, (fts_query(terms, "AND"), candidate_limit)).fetchall()
-        if not rows:
-            rows = connection.execute(sql, (fts_query(terms), candidate_limit)).fetchall()
+        answer, hits = query_evidence(connection, terms, limit)
     except sqlite3.Error as error:
         raise RetrievalError("unavailable", "vault projection is incompatible", 3) from error
     finally:
         if "connection" in locals():
             connection.close()
-
-    ranked: list[tuple[int, float, sqlite3.Row, list[str]]] = []
-    for row in rows:
-        content = str(row["content"] or "").casefold()
-        matched = [term for term in terms if term in content]
-        ranked.append((len(matched), float(row["score"]), row, matched))
-    ranked.sort(key=lambda item: (-item[0], item[1], str(item[2]["id"])))
-
-    hits = []
-    for coverage, score, row, matched in ranked[:limit]:
-        record_id = str(row["id"])
-        hits.append(
-            {
-                "id": record_id,
-                "record_type": str(row["record_type"]),
-                "label": label_from_json(str(row["json"]), record_id),
-                "citation_uri": f"jsonl://record/{record_id}",
-                "snippet": str(row["snippet"] or "").strip()[:800],
-                "matched_terms": matched,
-                "term_coverage": round(coverage / len(terms), 3),
-                "score": round(score, 6),
-            }
-        )
 
     elapsed_ms = round((time.perf_counter() - started) * 1000, 3)
     best_coverage = hits[0]["term_coverage"] if hits else 0.0
@@ -194,6 +290,7 @@ def retrieve(runtime: Path, query: str, limit: int) -> dict[str, Any]:
         },
         "elapsed_ms": elapsed_ms,
         "hits": hits,
+        "answer": answer,
     }
 
 
@@ -246,6 +343,19 @@ def render_markdown(result: dict[str, Any]) -> str:
     """Render compact human-facing Markdown."""
     if result["status"] == "not_found":
         return "# No evidence found\n\nThe fresh local index contained no matching records."
+    if result.get("answer"):
+        answer = result["answer"]
+        return "\n".join(
+            [
+                "# Answer",
+                "",
+                f"**{answer['text']}**",
+                "",
+                f"Source: `{answer['citation_uri']}`",
+                "",
+                f"Fresh at ledger sequence {result['freshness']['projection_sequence']}.",
+            ]
+        )
     heading = "Partial evidence" if result["status"] == "partial" else "Evidence"
     lines = [f"# {heading} · {result['count']} hit(s)", ""]
     if result["status"] == "partial":
