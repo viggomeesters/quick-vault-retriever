@@ -75,3 +75,45 @@ def test_raycast_keeps_partial_evidence_visible(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert "# Partial evidence" in result.stdout
+
+
+def test_raycast_symlink_uses_canonical_project_for_uv_fallback(tmp_path: Path) -> None:
+    runtime = build_runtime(
+        tmp_path,
+        [
+            {
+                "id": "project.synthetic.symlink",
+                "record_type": "project",
+                "title": "Symlink setup",
+                "content": "The Raycast symlink launches the vault retriever.",
+            }
+        ],
+    )
+    script = Path(__file__).parents[1] / "raycast" / "query-vault.sh"
+    commands_dir = tmp_path / "raycast-commands"
+    commands_dir.mkdir()
+    installed_script = commands_dir / "query-jsonl-vault.sh"
+    installed_script.symlink_to(script)
+    neutral_working_dir = tmp_path / "neutral"
+    neutral_working_dir.mkdir()
+    uv = shutil.which("uv")
+    assert uv is not None
+    environment = {
+        **os.environ,
+        "PATH": f"{Path(uv).parent}:/usr/bin:/bin",
+        "QUICK_VAULT_RUNTIME": os.fspath(runtime),
+    }
+    environment.pop("QUICK_VAULT_BIN", None)
+    environment.pop("VIRTUAL_ENV", None)
+
+    result = subprocess.run(
+        ["/bin/bash", os.fspath(installed_script), "symlink launches"],
+        cwd=neutral_working_dir,
+        text=True,
+        capture_output=True,
+        check=False,
+        env=environment,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "# Evidence" in result.stdout

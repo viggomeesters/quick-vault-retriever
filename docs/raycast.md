@@ -28,7 +28,9 @@ Save it as `~/.config/quick-vault-retriever/config.json`. Alternatively set
 
 The script first uses an installed `quick-vault` command. Otherwise it finds `uv` and runs the
 repository environment directly. It contains no runtime path, search SQL, network call, or vault
-mutation.
+mutation. The Script Commands directory may contain a symlink to `raycast/query-vault.sh`; the
+launcher resolves that symlink before locating the repository, so it does not depend on Raycast's
+working directory.
 
 ## Result states
 
