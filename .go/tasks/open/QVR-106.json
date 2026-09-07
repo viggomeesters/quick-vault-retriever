@@ -1,0 +1,50 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "QVR-106",
+  "project": "quick-vault-retriever",
+  "status": "open",
+  "summary": "Fall back across multi-term address subjects",
+  "description": "When strict subject-term matches contain no extractable address, retry the bounded subject search with OR semantics before abstaining.",
+  "scope": {
+    "read": [
+      "src/**",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "src/**",
+      "tests/**",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "An address question with a full name can resolve evidence containing only part of that name",
+    "Strict subject matches still win when they contain an address and footer-only evidence still abstains"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "architecture": {
+    "impact": "local",
+    "scope_refs": [
+      "retrieval-runtime"
+    ],
+    "concerns": [
+      "Multi-term property-query fallback semantics"
+    ],
+    "decision_ids": [],
+    "conformance_required": false,
+    "human_gate": "none"
+  }
+}
