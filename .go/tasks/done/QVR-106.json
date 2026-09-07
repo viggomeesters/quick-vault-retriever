@@ -1,0 +1,105 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "QVR-106",
+  "project": "quick-vault-retriever",
+  "status": "done",
+  "summary": "Fall back across multi-term address subjects",
+  "description": "When strict subject-term matches contain no extractable address, retry the bounded subject search with OR semantics before abstaining.",
+  "scope": {
+    "read": [
+      "src/**",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "src/**",
+      "tests/**",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "An address question with a full name can resolve evidence containing only part of that name",
+    "Strict subject matches still win when they contain an address and footer-only evidence still abstains"
+  ],
+  "verification": [
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-07T09:33:43+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-07T09:44:34+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Reviewed saturated full-name retrieval, conflicting-address abstention, bounded contextual snippets, synthetic-only regressions, privacy scan, and the full local gate; no blocking findings.",
+      "transaction_id": "b8013c9fcf46480782ea0519f5ec02c1",
+      "delivery": {
+        "delivery_id": "retrieval-v4",
+        "html": ".go/deliveries/retrieval-v4/index.html",
+        "manifest": ".go/deliveries/retrieval-v4/manifest.json",
+        "source_sha256": "02dc6b5b1b240083659e899b45b61574606bb95fab4fb938f17f54bfd4934916",
+        "html_sha256": "81d3f5c2de057cf784646cc8a6e787a28bc806ab82766784101d0b369f0d012b"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-07T09:44:34+02:00",
+      "task_id": "QVR-106",
+      "agent": "codex",
+      "summary": "changed_files=src/quick_vault_retriever/cli.py, tests/test_retriever.py, docs/architecture.md, .go lifecycle events; verification=make check, private full-name Raycast smoke with values excluded from repository, privacy scan, git diff check; result=42 tests passed, 97.15 percent coverage, full-name query returns bounded contextual candidates without guessing; tdd=RED strict full-name saturation hid partial-name address evidence then GREEN address-filtered candidate retrieval, RED conflicting strict addresses produced a guessed answer then GREEN partial candidates, RED snippets lacked disambiguating context then GREEN bounded address-centered context; critic=no blocking findings, candidate retrieval stays bounded and read-only, conflicting values abstain, generic retrieval unchanged, private values excluded from Git; runtime=codex",
+      "changed_files": [
+        "src/quick_vault_retriever/cli.py",
+        "tests/test_retriever.py",
+        "docs/architecture.md",
+        ".go lifecycle events"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "make check, private full-name Raycast smoke with values excluded from repository, privacy scan, git diff check",
+        "result": "42 tests passed, 97.15 percent coverage, full-name query returns bounded contextual candidates without guessing"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "no blocking findings, candidate retrieval stays bounded and read-only, conflicting values abstain, generic retrieval unchanged, private values excluded from Git",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "local",
+    "scope_refs": [
+      "retrieval-runtime"
+    ],
+    "concerns": [
+      "Multi-term property-query fallback semantics"
+    ],
+    "decision_ids": [],
+    "conformance_required": false,
+    "human_gate": "none"
+  }
+}

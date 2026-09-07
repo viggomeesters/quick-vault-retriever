@@ -61,6 +61,27 @@ RETRIEVAL_SQL = """
     ORDER BY score
     LIMIT ?
     """
+ADDRESS_RETRIEVAL_SQL = """
+    SELECT f.id, f.record_type, f.content, r.json,
+           bm25(record_fts) AS score,
+           snippet(record_fts, 2, '**', '**', ' … ', 36) AS snippet
+    FROM record_fts AS f
+    JOIN records AS r ON r.id = f.id
+    WHERE record_fts MATCH ?
+      AND (
+        f.content LIKE '%straat %' OR f.content LIKE '%laan %'
+        OR f.content LIKE '%weg %' OR f.content LIKE '%plein %'
+        OR f.content LIKE '%gracht %' OR f.content LIKE '%singel %'
+        OR f.content LIKE '%kade %' OR f.content LIKE '%dreef %'
+        OR f.content LIKE '%hof %' OR f.content LIKE '%park %'
+        OR f.content LIKE '%pad %' OR f.content LIKE '%steeg %'
+        OR f.content LIKE '%markt %' OR f.content LIKE '%boulevard %'
+        OR f.content LIKE '%street %' OR f.content LIKE '%road %'
+        OR f.content LIKE '%avenue %' OR f.content LIKE '%drive %'
+      )
+    ORDER BY score
+    LIMIT ?
+    """
 
 
 def query_terms(query: str) -> list[str]:
@@ -135,10 +156,10 @@ def address_subject_terms(terms: list[str]) -> list[str]:
     return [term for term in terms if term not in ADDRESS_INTENT_TERMS]
 
 
-def address_evidence(
-    rows: list[sqlite3.Row], subject_terms: list[str], original_terms: list[str], limit: int
-) -> tuple[dict[str, str] | None, list[dict[str, Any]]]:
-    """Extract the closest cited street address from bounded subject evidence."""
+def find_address_candidates(
+    rows: list[sqlite3.Row], subject_terms: list[str]
+) -> list[tuple[int, float, str, str, str, sqlite3.Row]]:
+    """Find and rank street addresses near subject terms in bounded rows."""
     candidates: list[tuple[int, float, str, str, str, sqlite3.Row]] = []
     for row in rows:
         content = str(row["content"] or "")
@@ -163,14 +184,31 @@ def address_evidence(
                     row,
                 )
             )
-    if not candidates:
-        return None, []
-
     candidates.sort(key=lambda item: (item[0], item[1], item[2], item[3]))
-    selected_address = candidates[0][3]
-    supporting = [candidate for candidate in candidates if candidate[3] == selected_address]
+    return candidates
+
+
+def address_context(content: str, address: str) -> str:
+    """Return bounded local context centered on one extracted address."""
+    position = content.casefold().find(address.casefold())
+    start = max(0, position - 160)
+    end = min(len(content), position + len(address) + 160)
+    context = content[start:end].strip()
+    highlighted = re.sub(
+        re.escape(address), f"**{address}**", context, count=1, flags=re.IGNORECASE
+    )
+    return f"{'… ' if start else ''}{highlighted}{' …' if end < len(content) else ''}"[:800]
+
+
+def address_hits(
+    candidates: list[tuple[int, float, str, str, str, sqlite3.Row]],
+    matched_terms: list[str],
+    term_coverage: float,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Render address candidates as bounded cited evidence hits."""
     hits: list[dict[str, Any]] = []
-    for _, score, _, _, address, row in supporting[:limit]:
+    for _, score, _, _, address, row in candidates[:limit]:
         record_id = str(row["id"])
         hits.append(
             {
@@ -178,12 +216,28 @@ def address_evidence(
                 "record_type": str(row["record_type"]),
                 "label": label_from_json(str(row["json"]), record_id),
                 "citation_uri": f"jsonl://record/{record_id}",
-                "snippet": f"**{address}**",
-                "matched_terms": original_terms,
-                "term_coverage": 1.0,
+                "snippet": address_context(str(row["content"] or ""), address),
+                "matched_terms": matched_terms,
+                "term_coverage": term_coverage,
                 "score": round(score, 6),
             }
         )
+    return hits
+
+
+def address_evidence(
+    rows: list[sqlite3.Row], subject_terms: list[str], original_terms: list[str], limit: int
+) -> tuple[dict[str, str] | None, list[dict[str, Any]]]:
+    """Extract the closest cited street address from bounded subject evidence."""
+    candidates = find_address_candidates(rows, subject_terms)
+    if not candidates:
+        return None, []
+    if len({candidate[3] for candidate in candidates}) > 1:
+        return broad_address_evidence(rows, subject_terms, original_terms, limit)
+
+    selected_address = candidates[0][3]
+    supporting = [candidate for candidate in candidates if candidate[3] == selected_address]
+    hits = address_hits(supporting, original_terms, 1.0, limit)
     answer: dict[str, str] = {
         "kind": "extracted_value",
         "field": "address",
@@ -193,14 +247,44 @@ def address_evidence(
     return answer, hits
 
 
+def broad_address_evidence(
+    rows: list[sqlite3.Row], subject_terms: list[str], original_terms: list[str], limit: int
+) -> tuple[None, list[dict[str, Any]]]:
+    """Return distinct address candidates without guessing among them."""
+    distinct = []
+    seen = set()
+    for candidate in find_address_candidates(rows, subject_terms):
+        normalized_address = candidate[3]
+        if normalized_address not in seen:
+            seen.add(normalized_address)
+            distinct.append(candidate)
+    coverage = round(len(subject_terms) / len(original_terms), 3)
+    return None, address_hits(distinct, subject_terms, coverage, limit)
+
+
 def fetch_rows(
-    connection: sqlite3.Connection, terms: list[str], candidate_limit: int
+    connection: sqlite3.Connection,
+    terms: list[str],
+    candidate_limit: int,
+    *,
+    operator: str | None = None,
 ) -> list[sqlite3.Row]:
     """Fetch bounded full-coverage rows, falling back to OR only when needed."""
+    if operator is not None:
+        return connection.execute(
+            RETRIEVAL_SQL, (fts_query(terms, operator), candidate_limit)
+        ).fetchall()
     rows = connection.execute(RETRIEVAL_SQL, (fts_query(terms, "AND"), candidate_limit)).fetchall()
     if rows:
         return rows
     return connection.execute(RETRIEVAL_SQL, (fts_query(terms), candidate_limit)).fetchall()
+
+
+def fetch_address_rows(
+    connection: sqlite3.Connection, terms: list[str], candidate_limit: int
+) -> list[sqlite3.Row]:
+    """Fetch bounded subject rows whose text can contain a street address."""
+    return connection.execute(ADDRESS_RETRIEVAL_SQL, (fts_query(terms), candidate_limit)).fetchall()
 
 
 def lexical_evidence(rows: list[sqlite3.Row], terms: list[str], limit: int) -> list[dict[str, Any]]:
@@ -237,9 +321,15 @@ def query_evidence(
     candidate_limit = min(max(limit * 8, 24), 160)
     subject_terms = address_subject_terms(terms)
     if subject_terms:
-        return address_evidence(
-            fetch_rows(connection, subject_terms, candidate_limit), subject_terms, terms, limit
-        )
+        rows = fetch_rows(connection, subject_terms, 160, operator="AND")
+        if len(subject_terms) > 1:
+            seen_ids = {str(row["id"]) for row in rows}
+            rows.extend(
+                row
+                for row in fetch_address_rows(connection, subject_terms, 160)
+                if str(row["id"]) not in seen_ids
+            )
+        return address_evidence(rows, subject_terms, terms, limit)
     return None, lexical_evidence(fetch_rows(connection, terms, candidate_limit), terms, limit)
 
 

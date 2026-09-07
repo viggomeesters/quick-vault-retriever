@@ -29,7 +29,8 @@ owns canonical knowledge nor produces the index.
 - **Retriever:** tokenizes broad natural-language input, queries FTS5, ranks term coverage, and
   returns bounded snippets. For an explicitly recognized property question, it may extract one
   bounded cited value from subject-matched evidence; this is record-type agnostic and currently
-  supports Dutch and English street-address questions.
+  supports Dutch and English street-address questions. Multiple conflicting values remain partial
+  evidence with bounded local context instead of being resolved by a ranking guess.
 - **Freshness gate:** verifies the projection schema and optionally compares its ledger sequence to
   a caller-supplied canonical watermark.
 - **Raycast adapter:** passes one arbitrary query and configured runtime path to the CLI. It contains

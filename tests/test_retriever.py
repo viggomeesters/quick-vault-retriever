@@ -153,6 +153,77 @@ def test_address_question_abstains_when_only_a_mail_footer_matches(tmp_path: Pat
     assert payload["hits"] == []
 
 
+def test_full_name_address_fallback_returns_candidates_without_guessing(tmp_path: Path) -> None:
+    records = [
+        {
+            "id": "note.synthetic.first-name-address",
+            "record_type": "note",
+            "title": "Moving day",
+            "content": "Nora meets everyone at Examplelaan 42 for moving day.",
+        },
+        {
+            "id": "note.synthetic.second-address",
+            "record_type": "note",
+            "title": "Old event",
+            "content": "Nora once attended an event at Archiveweg 9.",
+        },
+        {
+            "id": "note.synthetic.strict-distractor",
+            "record_type": "note",
+            "title": "Unrelated delivery",
+            "content": "Nora Example mentioned a delivery at Detourweg 5.",
+        },
+    ]
+    records.extend(
+        {
+            "id": f"note.synthetic.full-name-{index}",
+            "record_type": "note",
+            "title": f"Calendar invitation {index}",
+            "content": "Nora Example accepted the invitation without a location.",
+        }
+        for index in range(240)
+    )
+    runtime = build_runtime(tmp_path, records)
+
+    payload = retrieve(runtime, "Adres van Nora Example", 5)
+
+    assert payload["status"] == "partial"
+    assert payload["answer"] is None
+    snippets = " ".join(hit["snippet"] for hit in payload["hits"])
+    assert "**Archiveweg 9**" in snippets
+    assert "**Detourweg 5**" in snippets
+    assert "**Examplelaan 42**" in snippets
+    assert "moving day" in snippets
+
+
+def test_strict_address_matches_return_candidates_when_values_disagree(tmp_path: Path) -> None:
+    runtime = build_runtime(
+        tmp_path,
+        [
+            {
+                "id": "note.synthetic.current-address",
+                "record_type": "note",
+                "title": "Moving day",
+                "content": "Nora Example meets everyone at Examplelaan 42.",
+            },
+            {
+                "id": "note.synthetic.historical-address",
+                "record_type": "note",
+                "title": "Old event",
+                "content": "Nora Example once attended an event at Archiveweg 9.",
+            },
+        ],
+    )
+
+    payload = retrieve(runtime, "Adres van Nora Example", 5)
+
+    assert payload["status"] == "partial"
+    assert payload["answer"] is None
+    snippets = " ".join(hit["snippet"] for hit in payload["hits"])
+    assert "**Archiveweg 9**" in snippets
+    assert "**Examplelaan 42**" in snippets
+
+
 def test_stale_projection_fails_closed(tmp_path: Path) -> None:
     runtime = build_runtime(tmp_path, [], sequence=7)
     ledger = runtime / "ledger" / "changes.jsonl"
