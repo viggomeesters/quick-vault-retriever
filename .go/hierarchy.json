@@ -38,7 +38,8 @@
           "title": "Raycast Script Command adapter",
           "tasks": [
             "QVR-F003",
-            "QVR-103"
+            "QVR-103",
+            "QVR-104"
           ]
         }
       ],
